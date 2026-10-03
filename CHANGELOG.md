@@ -17,6 +17,8 @@ Most newer changes include the relevant [jj](https://jj-vcs.dev) change ids in p
   - This is the oldest version that syn v3 supports.
 - Relicense from MIT to [`MIT OR Apache-2.0`](https://spdx.dev/ids) (kxrrqpts)
   - Since the MIT license is still an option, this change actually makes licensing more permissive.
+- Require the exact matching version of `macro-kwargs-derive` (ultltztn)
+  - Generated code relies on internal APIs, so mismatched versions could fail to compile.
 
 ### Fixed
 - Fix span of missing argument errors in nested structs (pnrqmzup)

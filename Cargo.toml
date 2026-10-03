@@ -13,7 +13,9 @@ readme.workspace = true
 [dependencies]
 quote = "1"
 indexmap = "2"
-macro-kwargs-derive = { version = "0.3.0", path = "lib/derive" }
+# Exact version, since generated code relies on unstable internals (like `__private`).
+# Must be kept in sync with `workspace.package.version`.
+macro-kwargs-derive = { version = "=0.3.3", path = "lib/derive" }
 proc-macro2.workspace = true
 syn.workspace = true
 
