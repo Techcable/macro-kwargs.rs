@@ -12,6 +12,10 @@ Most newer changes include the relevant [jj](https://jj-vcs.dev) change ids in p
 
 ## Unreleased
 
+### Changes
+- *BIG*: Rename crate from `proc-macro-kwargs` to `macro-kwargs`. (ltmmqrrp)
+  - Crate with old name has been marked `#[deprecated(...)]` in v0.3.1 and will receive no further updates.
+
 ## v0.3.1 - 2026-10-03
 Warn about impending rename to `macro-kwargs`.
 
@@ -32,7 +36,7 @@ Add a `#[kwarg(with_syn)]` attribute to `#[derive(MacroKeywordArguments)]`.
 
 ### Added
 - Support a `#[kwarg(with_syn)]` shorthand to parse via [`syn::Parse`] instead of [`MacroArg`] (smwonvvz)
-  - More concise than using the [`proc_macro_kwargs::parse::Syn`] wrapper type (which doesn't even support `#[kwarg(with_wrapper)]`)
+  - More concise than using the [`macro_kwargs::parse::Syn`] wrapper type (which doesn't even support `#[kwarg(with_wrapper)]`)
   - Also available through the `#[kwarg(syn)]` shorthand
 
 [`MacroArg`]: https://docs.rs/proc-macro-kwargs/0.2/proc_macro_kwargs/parse/trait.MacroArg.html

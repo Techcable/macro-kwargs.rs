@@ -54,7 +54,7 @@ pub fn run_derive(input: &DeriveInput) -> Result<TokenStream, syn::Error> {
         // implement `with_syn` by reducing to `with_wrapper` with custom conversion
         if std::mem::replace(&mut attr.with_syn, false) {
             attr.with_wrapper = Some(syn::parse_quote_spanned! {
-                field_ty.span() => proc_macro_kwargs::parse::Syn::<#field_ty>
+                field_ty.span() => macro_kwargs::parse::Syn::<#field_ty>
             });
             custom_with_wrapper_conversion = Some(quote!(wrapper.into_inner()));
         }
@@ -71,14 +71,14 @@ pub fn run_derive(input: &DeriveInput) -> Result<TokenStream, syn::Error> {
                 );
                 parse_invocations.push(quote_spanned!(
                     wrapper_ty.span() => {
-                        let wrapper = <#wrapper_ty as proc_macro_kwargs::MacroArg>::parse_macro_arg(stream)?;
+                        let wrapper = <#wrapper_ty as macro_kwargs::MacroArg>::parse_macro_arg(stream)?;
                         #with_wrapper_conversion
                     }
                 ))
             }
             (None, None) => {
                 parse_invocations.push(quote_spanned!(
-                    field.ty.span() => <#field_ty as proc_macro_kwargs::MacroArg>::parse_macro_arg(stream)?
+                    field.ty.span() => <#field_ty as macro_kwargs::MacroArg>::parse_macro_arg(stream)?
                 ));
             }
         }
@@ -134,7 +134,7 @@ pub fn run_derive(input: &DeriveInput) -> Result<TokenStream, syn::Error> {
             #(#variant_names),*
         }
         #[automatically_derived]
-        impl proc_macro_kwargs::args::KeywordArgId for #id_enum_name {
+        impl macro_kwargs::args::KeywordArgId for #id_enum_name {
             fn as_str(&self) -> &'_ str {
                 match *self {
                     #(Self::#variant_names => #arg_name_strings),*
@@ -152,7 +152,7 @@ pub fn run_derive(input: &DeriveInput) -> Result<TokenStream, syn::Error> {
             #(#variant_names ( #parsed_arg_types )),*
         }
         #[automatically_derived]
-        impl proc_macro_kwargs::args::ParsedArgValue<#id_enum_name> for #parsed_arg_name {
+        impl macro_kwargs::args::ParsedArgValue<#id_enum_name> for #parsed_arg_name {
             fn id(&self) -> #id_enum_name {
                 match *self {
                     #(#parsed_arg_name::#variant_names (_) => #id_enum_name::#variant_names),*
@@ -171,17 +171,17 @@ pub fn run_derive(input: &DeriveInput) -> Result<TokenStream, syn::Error> {
             }
         }
         #[automatically_derived]
-        impl #impl_generics proc_macro_kwargs::MacroKeywordArgs
+        impl #impl_generics macro_kwargs::MacroKeywordArgs
                 for #original_ident #ty_generics #where_clause {
             type ArgId = #id_enum_name;
             type ParsedArg = #parsed_arg_name;
-            fn from_keyword_args(mut argument_list: proc_macro_kwargs::args::ParsedKeywordArguments<Self>) -> syn::Result<Self> {
+            fn from_keyword_args(mut argument_list: macro_kwargs::args::ParsedKeywordArguments<Self>) -> syn::Result<Self> {
                 #[allow(unused_imports)] // Possible if empty
-                use proc_macro_kwargs::args::ParsedArgValue;
+                use macro_kwargs::args::ParsedArgValue;
                 let mut missing_argument_errors = Vec::new();
                 #(#field_declarations)*
                 if !missing_argument_errors.is_empty() {
-                    return Err(proc_macro_kwargs::combine_errors(missing_argument_errors));
+                    return Err(macro_kwargs::combine_errors(missing_argument_errors));
                 }
                 Ok(#original_ident {
                     #(#field_names: #field_inits),*
@@ -198,7 +198,7 @@ pub fn run_derive(input: &DeriveInput) -> Result<TokenStream, syn::Error> {
         /// Parse as a nested value inside another set of arguments,
         /// by surrounding it with braces `{}`
         #[automatically_derived]
-        impl #impl_generics proc_macro_kwargs::MacroArg
+        impl #impl_generics macro_kwargs::MacroArg
                 for #original_ident #ty_generics #where_clause {
             fn parse_macro_arg(stream: syn::parse::ParseStream) -> syn::Result<Self> {
                 let content;
@@ -226,7 +226,7 @@ struct FieldAttrs {
     with_wrapper: Option<Type>,
     /// If true, parses using the syn [`syn::Parse`] trait.
     ///
-    /// Equivalent to `with_wrapper = proc_macro_kwargs::parse::Syn`.
+    /// Equivalent to `with_wrapper = macro_kwargs::parse::Syn`.
     with_syn: bool,
 }
 #[allow(clippy::derivable_impls)]

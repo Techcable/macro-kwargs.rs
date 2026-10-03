@@ -1,5 +1,5 @@
 [package]
-name = "proc-macro-kwargs"
+name = "macro-kwargs"
 version.workspace = true
 description = "Keyword argument parsing for function-like proc-macros"
 license.workspace = true
@@ -9,7 +9,7 @@ edition.workspace = true
 [dependencies]
 quote = "1"
 indexmap = "2"
-proc-macro-kwargs-derive = { version = "0.3.0", path = "lib/derive" }
+macro-kwargs-derive = { version = "0.3.0", path = "lib/derive" }
 proc-macro2.workspace = true
 syn.workspace = true
 
@@ -18,10 +18,10 @@ resolver = "2"
 members = ["lib/derive"]
 
 [workspace.package]
-version = "0.3.1"
+version = "0.3.2"
 edition = "2021"
 license = "MIT"
-repository = "https://github.com/Techcable/proc-macro-kwargs.rust"
+repository = "https://github.com/Techcable/macro-kwargs.rs"
 
 [workspace.dependencies]
 proc-macro2 = { version = "1", default-features = false }

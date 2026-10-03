@@ -1,7 +1,7 @@
 [package]
-name = "proc-macro-kwargs-derive"
+name = "macro-kwargs-derive"
 version.workspace = true
-description = "Procedural derive for proc-macro-kwargs"
+description = "Procedural derive for macro-kwargs"
 edition.workspace = true
 repository.workspace = true
 license.workspace = true

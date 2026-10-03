@@ -1,4 +1,4 @@
-use proc_macro_kwargs::{parse::NestedList, MacroKeywordArgs};
+use macro_kwargs::{parse::NestedList, MacroKeywordArgs};
 
 #[derive(MacroKeywordArgs, Debug, PartialEq)]
 pub struct ExampleArgs {
