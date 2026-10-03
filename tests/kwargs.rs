@@ -231,3 +231,29 @@ fn via_syn_macro() {
     let wrapped = macro_kwargs::parse::parse_str::<via_syn_macro::Wrapped>("foo").unwrap();
     assert_eq!(wrapped.0, "foo");
 }
+
+/// Field names must not clash with locals in the generated code.
+#[derive(MacroKeywordArgs, Debug, PartialEq)]
+pub struct ClashingFieldNames {
+    argument_list: u32,
+    #[kwarg(optional)]
+    missing_argument_errors: u32,
+    other: u32,
+}
+
+#[test]
+fn clashing_field_names() {
+    assert_eq!(
+        syn::parse_str::<ClashingFieldNames>(
+            "argument_list => 1, missing_argument_errors => 2, other => 3"
+        )
+        .unwrap(),
+        ClashingFieldNames {
+            argument_list: 1,
+            missing_argument_errors: 2,
+            other: 3,
+        }
+    );
+    let err = syn::parse_str::<ClashingFieldNames>("argument_list => 1").unwrap_err();
+    assert_eq!(err.to_string(), "Missing required argument `other`");
+}

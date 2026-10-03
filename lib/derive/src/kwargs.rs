@@ -94,12 +94,18 @@ pub fn run_derive(input: &DeriveInput) -> Result<TokenStream, syn::Error> {
             other.id(),
             stringify!(#variant_name)
         ));
+        /*
+         * Bind each field to a mangled local,
+         * so user-chosen field names can't shadow
+         * the generated locals (like `argument_list`).
+         */
+        let field_local = format_ident!("__field_{}", ident, span = ident.span());
         if attr.optional {
             let default_val = quote_spanned!(
                 field.ty.span() => <#field_ty as Default>::default()
             );
             field_declarations.push(quote! {
-                let #ident: #field_ty = match argument_list
+                let #field_local: #field_ty = match argument_list
                     .take(#id_enum_name::#variant_name)
                     .map(|arg| arg.value) {
                     Some(#parsed_arg_name::#variant_name ( res )) => res,
@@ -107,10 +113,10 @@ pub fn run_derive(input: &DeriveInput) -> Result<TokenStream, syn::Error> {
                     None => #default_val
                 };
             });
-            field_inits.push(quote!(#ident));
+            field_inits.push(quote!(#ident: #field_local));
         } else {
             field_declarations.push(quote! {
-                let #ident: Option<#field_ty> = match argument_list.require(#id_enum_name::#variant_name).map(|arg| arg.value) {
+                let #field_local: Option<#field_ty> = match argument_list.require(#id_enum_name::#variant_name).map(|arg| arg.value) {
                     Ok(#parsed_arg_name::#variant_name ( res ) ) => Some(res),
                     Ok(other) => #cast_failure,
                     Err(e) => {
@@ -119,7 +125,7 @@ pub fn run_derive(input: &DeriveInput) -> Result<TokenStream, syn::Error> {
                     }
                 };
             });
-            field_inits.push(quote!(#ident: #ident.unwrap()));
+            field_inits.push(quote!(#ident: #field_local.unwrap()));
         }
     }
     let (impl_generics, ty_generics, where_clause) = input.generics.split_for_impl();
