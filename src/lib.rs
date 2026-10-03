@@ -36,6 +36,16 @@ pub mod parse;
 pub use args::MacroKeywordArgs;
 pub use parse::MacroArg;
 
+/// Re-exports used by generated code,
+/// so users don't need to depend on these crates directly.
+///
+/// NOTE: This is an internal implementation detail
+#[doc(hidden)]
+pub mod __private {
+    pub use proc_macro2;
+    pub use syn;
+}
+
 /// Combine multiple `syn` errors into a single error struct
 ///
 /// Panics if the specified vector is empty.

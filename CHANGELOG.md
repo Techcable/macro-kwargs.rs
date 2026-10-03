@@ -22,6 +22,7 @@ Most newer changes include the relevant [jj](https://jj-vcs.dev) change ids in p
 - Fix span of missing argument errors in nested structs (pnrqmzup)
 - Avoid redundant_field_names lint in generated code (nvqqkunl)
 - Fix `#[kwarg(with_func = "...")]`, which previously failed to compile as the function wasn't properly called (movmzuok)
+- Generated code no longer requires a direct dependency on `syn` or `proc-macro2` (vlkusror)
 
 ## v0.3.3 - 2026-10-03
 Rename crate to `macro-kwargs`.

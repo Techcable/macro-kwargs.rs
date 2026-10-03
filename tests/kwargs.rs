@@ -179,3 +179,35 @@ fn with_func() {
     let err = syn::parse_str::<WithFuncArgs>(r#"num => "not a number""#).unwrap_err();
     assert_eq!(err.to_string(), "expected integer literal");
 }
+
+/// Generated code must not depend on `syn` or `proc_macro2` being in scope,
+/// since users of the derive may not depend on those crates directly.
+///
+/// The empty modules here shadow those crate names,
+/// breaking any generated paths that refer to them.
+mod without_syn_in_scope {
+    #![allow(dead_code)]
+    use macro_kwargs::MacroKeywordArgs;
+
+    mod syn {}
+    mod proc_macro2 {}
+
+    #[derive(MacroKeywordArgs, Debug, PartialEq)]
+    pub struct ShadowedArgs {
+        pub num: u32,
+        #[kwarg(optional)]
+        pub name: String,
+    }
+}
+
+#[test]
+fn without_syn_in_scope() {
+    use without_syn_in_scope::ShadowedArgs;
+    assert_eq!(
+        syn::parse_str::<ShadowedArgs>(r#"num => 7, name => "x""#).unwrap(),
+        ShadowedArgs {
+            num: 7,
+            name: "x".into(),
+        }
+    );
+}

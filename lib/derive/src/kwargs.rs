@@ -156,9 +156,9 @@ pub fn run_derive(input: &DeriveInput) -> Result<TokenStream, syn::Error> {
             }
             fn parse_with_id(
                 id: #id_enum_name ,
-                id_span: proc_macro2::Span,
-                stream: syn::parse::ParseStream,
-            ) -> syn::Result<Self> {
+                id_span: macro_kwargs::__private::proc_macro2::Span,
+                stream: macro_kwargs::__private::syn::parse::ParseStream,
+            ) -> macro_kwargs::__private::syn::Result<Self> {
                 Ok(match id {
                     #(#id_enum_name::#variant_names => {
                         Self::#variant_names(#parse_invocations)
@@ -171,7 +171,7 @@ pub fn run_derive(input: &DeriveInput) -> Result<TokenStream, syn::Error> {
                 for #original_ident #ty_generics #where_clause {
             type ArgId = #id_enum_name;
             type ParsedArg = #parsed_arg_name;
-            fn from_keyword_args(mut argument_list: macro_kwargs::args::ParsedKeywordArguments<Self>) -> syn::Result<Self> {
+            fn from_keyword_args(mut argument_list: macro_kwargs::args::ParsedKeywordArguments<Self>) -> macro_kwargs::__private::syn::Result<Self> {
                 #[allow(unused_imports)] // Possible if empty
                 use macro_kwargs::args::ParsedArgValue;
                 let mut missing_argument_errors = Vec::new();
@@ -185,9 +185,9 @@ pub fn run_derive(input: &DeriveInput) -> Result<TokenStream, syn::Error> {
             }
         }
         #[automatically_derived]
-        impl #impl_generics syn::parse::Parse
+        impl #impl_generics macro_kwargs::__private::syn::parse::Parse
                 for #original_ident #ty_generics #where_clause {
-            fn parse(stream: syn::parse::ParseStream) -> syn::Result<Self> {
+            fn parse(stream: macro_kwargs::__private::syn::parse::ParseStream) -> macro_kwargs::__private::syn::Result<Self> {
                 Self::from_keyword_args(stream.parse()?)
             }
         }
@@ -196,7 +196,7 @@ pub fn run_derive(input: &DeriveInput) -> Result<TokenStream, syn::Error> {
         #[automatically_derived]
         impl #impl_generics macro_kwargs::MacroArg
                 for #original_ident #ty_generics #where_clause {
-            fn parse_macro_arg(stream: syn::parse::ParseStream) -> syn::Result<Self> {
+            fn parse_macro_arg(stream: macro_kwargs::__private::syn::parse::ParseStream) -> macro_kwargs::__private::syn::Result<Self> {
                 Self::from_keyword_args(
                     <macro_kwargs::args::ParsedKeywordArguments<Self> as macro_kwargs::MacroArg>::parse_macro_arg(stream)?
                 )
