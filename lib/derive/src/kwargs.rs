@@ -2,11 +2,9 @@ use std::collections::BTreeSet;
 
 use proc_macro2::{Ident, TokenStream};
 use quote::{format_ident, quote, quote_spanned};
-use syn::{
-    parse::{Parse, ParseStream},
-    spanned::Spanned,
-    Attribute, Data, DeriveInput, Error, Fields, LitStr, Path, Token, Type,
-};
+use syn::parse::{Parse, ParseStream};
+use syn::spanned::Spanned;
+use syn::{Attribute, Data, DeriveInput, Error, Fields, LitStr, Path, Token, Type};
 
 pub fn run_derive(input: &DeriveInput) -> Result<TokenStream, syn::Error> {
     let s = match input.data {
@@ -18,7 +16,7 @@ pub fn run_derive(input: &DeriveInput) -> Result<TokenStream, syn::Error> {
             ));
         }
         Data::Union(ref u) => {
-            return Err(Error::new(u.union_token.span(), "Unions are unsupported"))
+            return Err(Error::new(u.union_token.span(), "Unions are unsupported"));
         }
     };
     let named_fields = match s.fields {

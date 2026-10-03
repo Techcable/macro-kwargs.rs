@@ -1,5 +1,5 @@
 use proc_macro::TokenStream as RawTokenStream;
-use syn::{parse_macro_input, DeriveInput};
+use syn::{DeriveInput, parse_macro_input};
 
 pub(crate) mod kwargs;
 

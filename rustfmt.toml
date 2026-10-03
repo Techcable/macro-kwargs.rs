@@ -1,0 +1,9 @@
+unstable_features = true
+
+style_edition = "2024"
+edition = "2021"
+imports_granularity = "module"
+group_imports = "StdExternalCrate"
+
+# do not collapse small struct definitions into a single line
+struct_variant_width = 0

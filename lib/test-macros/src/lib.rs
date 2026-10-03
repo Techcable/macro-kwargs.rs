@@ -2,7 +2,8 @@
 //!
 //! Each macro parses its input and expands to nothing on success,
 //! or to the resulting `compile_error!` on failure.
-use macro_kwargs::{parse::NestedList, MacroKeywordArgs};
+use macro_kwargs::MacroKeywordArgs;
+use macro_kwargs::parse::NestedList;
 use proc_macro::TokenStream as RawTokenStream;
 use syn::parse_macro_input;
 

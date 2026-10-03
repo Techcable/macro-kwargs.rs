@@ -4,13 +4,12 @@ use std::marker::PhantomData;
 use std::ops::{Deref, DerefMut};
 
 use indexmap::IndexMap;
-
 use proc_macro2::{Ident, TokenStream};
 use quote::ToTokens;
 use syn::parse::{Parse, ParseStream};
 use syn::punctuated::Punctuated;
 use syn::spanned::Spanned;
-use syn::{braced, bracketed, parenthesized, Token};
+use syn::{Token, braced, bracketed, parenthesized};
 
 /// A type that can be parsed as an argument
 /// to a macro.

@@ -202,13 +202,15 @@ jobs:
     steps:
       - uses: actions/checkout@v7
         # need nightly for unstable formatting features
-      - uses: dtolnay/rust-toolchain@nightly
+      - uses: dtolnay/rust-toolchain@master
         with:
+          # pinned to workaround rustfmt bug
+          toolchain: nightly-2026-09-16
           components: rustfmt
       - shell: bash
         # While `--all` is normally an alias for `--workspace`, `cargo fmt` doesn't accept the latter
         run: |
-          cargo fmt --all -- --check
+          cargo +nightly-2026-09-16 fmt --all -- --check
 
   tombi:
     # Only run on PRs if the source branch is on someone else's repo

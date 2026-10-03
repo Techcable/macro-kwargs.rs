@@ -5,11 +5,13 @@
 use std::fmt::Debug;
 use std::hash::Hash;
 
-use indexmap::{map::Entry, IndexMap};
-
+use indexmap::IndexMap;
+use indexmap::map::Entry;
 use proc_macro2::{Ident, Span};
+use syn::ext::IdentExt;
 use syn::parse::{Parse, ParseStream};
-use syn::{braced, ext::IdentExt, punctuated::Punctuated, Token};
+use syn::punctuated::Punctuated;
+use syn::{Token, braced};
 
 use crate::MacroArg;
 
