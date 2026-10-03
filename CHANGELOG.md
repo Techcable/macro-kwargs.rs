@@ -12,6 +12,9 @@ Most newer changes include the relevant [jj](https://jj-vcs.dev) change ids in p
 
 ## Unreleased
 
+## v0.2.1 - 2026-10-03
+Add a `#[kwarg(with_syn)]` attribute to `#[derive(MacroKeywordArguments)]`.
+
 ### Added
 - Support a `#[kwarg(with_syn)]` shorthand to parse via [`syn::Parse`] instead of [`MacroArg`] (smwonvvz)
   - More concise than using the [`proc_macro_kwargs::parse::Syn`] wrapper type (which doesn't even support `#[kwarg(with_wrapper)]`)
