@@ -1,0 +1,16 @@
+[package]
+name = "macro-kwargs-test-macros"
+version.workspace = true
+description = "Procedural macros used to test macro-kwargs (not published)"
+edition.workspace = true
+repository.workspace = true
+license.workspace = true
+publish = false
+
+[lib]
+proc-macro = true
+
+[dependencies]
+macro-kwargs = { path = "../.." }
+syn = { workspace = true, features = ["proc-macro"] }
+proc-macro2 = { workspace = true, features = ["proc-macro"] }

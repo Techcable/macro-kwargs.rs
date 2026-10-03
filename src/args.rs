@@ -62,8 +62,19 @@ impl<K: MacroKeywordArgs> Parse for KeywordArg<K> {
 pub struct ParsedKeywordArguments<K: MacroKeywordArgs> {
     /// A map of arguments, in the order of the declaration.
     by_name: IndexMap<K::ArgId, KeywordArg<K>>,
+    /// The span of the whole argument list,
+    /// used for errors about missing arguments.
+    span: Span,
 }
 impl<K: MacroKeywordArgs> ParsedKeywordArguments<K> {
+    /// The span of the whole argument list
+    ///
+    /// For nested arguments, this is the span of the surrounding braces.
+    /// At the top level, this defaults to [`Span::call_site`].
+    #[inline]
+    pub fn span(&self) -> Span {
+        self.span
+    }
     /// Lookup a argument by its id,
     /// returning `None` if it's missing
     pub fn get(&self, id: K::ArgId) -> Option<&'_ KeywordArg<K>> {
@@ -83,7 +94,7 @@ impl<K: MacroKeywordArgs> ParsedKeywordArguments<K> {
     pub fn require(&mut self, id: K::ArgId) -> syn::Result<KeywordArg<K>> {
         self.take(id).ok_or_else(|| {
             syn::Error::new(
-                Span::call_site(),
+                self.span,
                 format!("Missing required argument `{}`", id.as_str()),
             )
         })
@@ -117,14 +128,19 @@ impl<K: MacroKeywordArgs> Parse for ParsedKeywordArguments<K> {
         if !errors.is_empty() {
             return Err(crate::combine_errors(errors));
         }
-        Ok(ParsedKeywordArguments { by_name })
+        Ok(ParsedKeywordArguments {
+            by_name,
+            span: Span::call_site(),
+        })
     }
 }
 impl<K: MacroKeywordArgs> MacroArg for ParsedKeywordArguments<K> {
     fn parse_macro_arg(stream: ParseStream) -> syn::Result<Self> {
         let content;
-        braced!(content in stream);
-        content.parse::<Self>()
+        let braces = braced!(content in stream);
+        let mut res = content.parse::<Self>()?;
+        res.span = braces.span.join();
+        Ok(res)
     }
 }
 

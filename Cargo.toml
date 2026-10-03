@@ -14,9 +14,13 @@ macro-kwargs-derive = { version = "0.3.0", path = "lib/derive" }
 proc-macro2.workspace = true
 syn.workspace = true
 
+[dev-dependencies]
+trybuild = "1"
+macro-kwargs-test-macros = { path = "lib/test-macros" }
+
 [workspace]
 resolver = "2"
-members = ["lib/derive"]
+members = ["lib/derive", "lib/test-macros"]
 
 [workspace.package]
 version = "0.3.3"

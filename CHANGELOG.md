@@ -16,6 +16,9 @@ Most newer changes include the relevant [jj](https://jj-vcs.dev) change ids in p
 - Declare minimum supported rust version of 1.71 (mrvqwsux)
   - This is the oldest version that syn v3 supports.
 
+### Fixed
+- Fix span of missing argument errors in nested structs (pnrqmzup)
+
 ## v0.3.3 - 2026-10-03
 Rename crate to `macro-kwargs`.
 

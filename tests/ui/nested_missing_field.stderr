@@ -1,0 +1,5 @@
+error: Missing required argument `foo`
+ --> tests/ui/nested_missing_field.rs:7:15
+  |
+7 |     nested => { first => 12 },
+  |               ^^^^^^^^^^^^^^^

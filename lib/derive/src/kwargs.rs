@@ -201,9 +201,9 @@ pub fn run_derive(input: &DeriveInput) -> Result<TokenStream, syn::Error> {
         impl #impl_generics macro_kwargs::MacroArg
                 for #original_ident #ty_generics #where_clause {
             fn parse_macro_arg(stream: syn::parse::ParseStream) -> syn::Result<Self> {
-                let content;
-                syn::braced!(content in stream);
-                content.parse()
+                Self::from_keyword_args(
+                    <macro_kwargs::args::ParsedKeywordArguments<Self> as macro_kwargs::MacroArg>::parse_macro_arg(stream)?
+                )
             }
         }
     })
