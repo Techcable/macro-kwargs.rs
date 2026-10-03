@@ -59,7 +59,7 @@ pub fn run_derive(input: &DeriveInput) -> Result<TokenStream, syn::Error> {
             (Some(_), Some(_)) => unreachable!("conflicting 'with' options"),
             (Some(with_func), None) => {
                 parse_invocations.push(quote_spanned!(
-                    with_func.span() => #with_func ?
+                    with_func.span() => #with_func(stream)?
                 ));
             }
             (None, Some(wrapper_ty)) => {

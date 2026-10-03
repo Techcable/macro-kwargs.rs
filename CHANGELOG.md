@@ -21,6 +21,7 @@ Most newer changes include the relevant [jj](https://jj-vcs.dev) change ids in p
 ### Fixed
 - Fix span of missing argument errors in nested structs (pnrqmzup)
 - Avoid redundant_field_names lint in generated code (nvqqkunl)
+- Fix `#[kwarg(with_func = "...")]`, which previously failed to compile as the function wasn't properly called (movmzuok)
 
 ## v0.3.3 - 2026-10-03
 Rename crate to `macro-kwargs`.

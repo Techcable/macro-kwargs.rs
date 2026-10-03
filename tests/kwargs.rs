@@ -132,3 +132,50 @@ fn syn_expr() {
         }
     );
 }
+
+mod custom_parse {
+    use syn::parse::ParseStream;
+
+    /// Parses a sequence of identifiers, unlike the default `Vec` handling.
+    pub fn idents(stream: ParseStream) -> syn::Result<Vec<String>> {
+        let mut res = Vec::new();
+        while stream.peek(syn::Ident) {
+            res.push(stream.parse::<syn::Ident>()?.to_string());
+        }
+        Ok(res)
+    }
+}
+
+/// Parses an integer literal and doubles it,
+/// so the test can tell this function was actually used.
+fn doubled(stream: syn::parse::ParseStream) -> syn::Result<u32> {
+    Ok(stream.parse::<syn::LitInt>()?.base10_parse::<u32>()? * 2)
+}
+
+#[derive(MacroKeywordArgs, Debug, PartialEq)]
+pub struct WithFuncArgs {
+    #[kwarg(with_func = "doubled")]
+    num: u32,
+    #[kwarg(optional, with_func = "custom_parse::idents")]
+    names: Vec<String>,
+}
+
+#[test]
+fn with_func() {
+    assert_eq!(
+        syn::parse_str::<WithFuncArgs>("num => 21, names => foo bar baz").unwrap(),
+        WithFuncArgs {
+            num: 42,
+            names: vec!["foo".into(), "bar".into(), "baz".into()],
+        }
+    );
+    assert_eq!(
+        syn::parse_str::<WithFuncArgs>("num => 3").unwrap(),
+        WithFuncArgs {
+            num: 6,
+            names: Vec::new(),
+        }
+    );
+    let err = syn::parse_str::<WithFuncArgs>(r#"num => "not a number""#).unwrap_err();
+    assert_eq!(err.to_string(), "expected integer literal");
+}
