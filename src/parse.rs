@@ -190,18 +190,21 @@ impl<T> From<ExplicitOption<T>> for Option<T> {
 }
 impl<T: MacroArg> MacroArg for ExplicitOption<T> {
     fn parse_macro_arg(stream: ParseStream) -> syn::Result<Self> {
-        if stream.peek(syn::Ident) {
-            let ident = stream.parse::<Ident>().unwrap();
-            if ident == "Some" {
-                let content;
-                parenthesized!(content in stream);
-                return Ok(ExplicitOption(Some(T::parse_macro_arg(&content)?)));
-            } else if ident == "None" {
-                return Ok(ExplicitOption(None));
-            }
+        const EXPECTED: &str = "Expected either `Some` or `None`";
+        if !stream.peek(syn::Ident) {
+            return Err(stream.error(EXPECTED));
         }
-        // fall-through to error
-        Err(stream.error("Expected either `Some` or `None`"))
+        let ident = stream.parse::<Ident>()?;
+        if ident == "Some" {
+            let content;
+            parenthesized!(content in stream);
+            Ok(ExplicitOption(Some(T::parse_macro_arg(&content)?)))
+        } else if ident == "None" {
+            Ok(ExplicitOption(None))
+        } else {
+            // point at the unexpected identifier, not whatever follows it
+            Err(syn::Error::new(ident.span(), EXPECTED))
+        }
     }
 }
 
@@ -406,5 +409,21 @@ mod test {
             parse_str::<ExplicitOption::<String>>(r##"Some("foo")"##).unwrap(),
             ExplicitOption(Some(String::from("foo")))
         );
+    }
+    #[test]
+    fn explicit_option_error_span() {
+        // relies on the `span-locations` feature of proc-macro2 (enabled in dev-dependencies)
+        let check = |input: &str, expected_column: usize| {
+            let err = parse_str::<ExplicitOption<i32>>(input).unwrap_err();
+            assert_eq!(
+                err.to_string(),
+                "Expected either `Some` or `None`",
+                "{input:?}"
+            );
+            assert_eq!(err.span().start().column, expected_column, "{input:?}");
+        };
+        check("Foo", 0);
+        check("  Foo(5)", 2);
+        check("5", 0);
     }
 }

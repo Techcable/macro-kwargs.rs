@@ -19,6 +19,8 @@ syn.workspace = true
 
 [dev-dependencies]
 trybuild = "1"
+# needed to check error spans in tests
+proc-macro2 = { workspace = true, features = ["span-locations"] }
 macro-kwargs-test-macros = { path = "lib/test-macros" }
 
 [lints]
