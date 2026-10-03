@@ -1,0 +1,11 @@
+error: Duplicate argument name `a`, also used by field `a`
+ --> tests/ui/duplicate_arg_name.rs:7:22
+  |
+7 |     #[kwarg(rename = "a")]
+  |                      ^^^
+
+error: Duplicate argument name `c`, also used by field `c`
+  --> tests/ui/duplicate_arg_name.rs:10:22
+   |
+10 |     #[kwarg(rename = "c")]
+   |                      ^^^

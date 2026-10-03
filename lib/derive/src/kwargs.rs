@@ -1,4 +1,4 @@
-use std::collections::BTreeSet;
+use std::collections::{BTreeSet, HashMap};
 
 use proc_macro2::{Ident, TokenStream};
 use quote::{format_ident, quote, quote_spanned};
@@ -36,11 +36,27 @@ pub fn run_derive(input: &DeriveInput) -> Result<TokenStream, syn::Error> {
     let mut parsed_arg_types = Vec::new();
     let mut arg_name_strings = Vec::new();
     let mut parse_invocations = Vec::new();
+    // maps each argument name to the field that uses it
+    let mut fields_by_arg_name: HashMap<String, &Ident> = HashMap::new();
+    let mut duplicate_name_error: Option<Error> = None;
     for field in &named_fields.named {
         use heck::ToUpperCamelCase;
         let mut attr = FieldAttrs::find_attr(&field.attrs)?.unwrap_or_default();
         let ident = field.ident.as_ref().unwrap();
-        let arg_name = attr.rename.clone().unwrap_or_else(|| ident.to_string());
+        let (arg_name, arg_name_span) = match attr.rename {
+            Some(ref renamed) => (renamed.value(), renamed.span()),
+            None => (ident.to_string(), ident.span()),
+        };
+        if let Some(existing) = fields_by_arg_name.insert(arg_name.clone(), ident) {
+            let error = Error::new(
+                arg_name_span,
+                format!("Duplicate argument name `{arg_name}`, also used by field `{existing}`"),
+            );
+            match duplicate_name_error {
+                Some(ref mut combined) => combined.combine(error),
+                None => duplicate_name_error = Some(error),
+            }
+        }
         let variant_name = Ident::new(&ident.to_string().to_upper_camel_case(), ident.span());
         variant_names.push(variant_name.clone());
         arg_name_strings.push(arg_name);
@@ -127,6 +143,9 @@ pub fn run_derive(input: &DeriveInput) -> Result<TokenStream, syn::Error> {
             });
             field_inits.push(quote!(#ident: #field_local.unwrap()));
         }
+    }
+    if let Some(error) = duplicate_name_error {
+        return Err(error);
     }
     let (impl_generics, ty_generics, where_clause) = input.generics.split_for_impl();
     Ok(quote! {
@@ -217,7 +236,7 @@ struct FieldAttrs {
     /// value if missing
     optional: bool,
     /// Rename the field's expected.
-    rename: Option<String>,
+    rename: Option<LitStr>,
     /// Parse the value by delegating to the specified function
     ///
     /// The function's signature must be
@@ -340,8 +359,7 @@ impl Parse for FieldAttrs {
                 }
                 Attr::Rename => {
                     stream.parse::<Token![=]>()?;
-                    let renamed = stream.parse::<LitStr>()?;
-                    res.rename = Some(renamed.value());
+                    res.rename = Some(stream.parse::<LitStr>()?);
                 }
                 Attr::WithFunc => {
                     stream.parse::<Token![=]>()?;
