@@ -243,7 +243,7 @@ struct FieldAttrs {
     /// and should be replaced with its `Default`
     /// value if missing
     optional: bool,
-    /// Rename the field's expected.
+    /// Make the name of the expected field different from the struct's field name.
     rename: Option<LitStr>,
     /// Parse the value by delegating to the specified function
     ///
