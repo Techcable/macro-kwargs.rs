@@ -12,6 +12,9 @@ Most newer changes include the relevant [jj](https://jj-vcs.dev) change ids in p
 
 ## Unreleased
 
+### Changes
+- *BREAKING*: Update to syn v3
+
 ## v0.2.1 - 2026-10-03
 Add a `#[kwarg(with_syn)]` attribute to `#[derive(MacroKeywordArguments)]`.
 

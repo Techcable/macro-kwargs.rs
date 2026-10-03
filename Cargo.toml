@@ -27,6 +27,6 @@ repository = "https://github.com/Techcable/proc-macro-kwargs.rust"
 proc-macro2 = { version = "1", default-features = false }
 
 [workspace.dependencies.syn]
-version = "2"
+version = "3"
 default-features = false
 features = ["parsing", "printing", "derive", "extra-traits"]
