@@ -2,6 +2,9 @@ proc-macro-kwargs
 ==================
 Keyword argument parsing for function-like procedural macros (Rust).
 
+**WARNING**: This crate has been renamed to `macro-kwargs`.
+Please use the new version.
+
 ## Example
 ````rust
 example_macro!(

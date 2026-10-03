@@ -1,5 +1,8 @@
 //! Keyword argument parsing for function-like procedural macros.
+//!
+//! **WARNING**: This crate has been renamed to `macro-kwargs`.
 #![deny(missing_docs)]
+#![deprecated(note = "Renamed to `macro-kwargs`")]
 pub use proc_macro_kwargs_derive::MacroKeywordArgs;
 
 pub mod args;
