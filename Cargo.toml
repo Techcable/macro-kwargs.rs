@@ -50,7 +50,6 @@ default-features = false
 features = ["parsing", "printing", "derive", "extra-traits"]
 
 [workspace.lints.clippy]
-
 ## groups ##
 pedantic = { level = "warn", priority = -1 }
 cargo = { level = "warn", priority = -1 }
