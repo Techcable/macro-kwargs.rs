@@ -27,6 +27,7 @@ Most newer changes include the relevant [jj](https://jj-vcs.dev) change ids in p
 - Point `ExplicitOption` parse errors at the unexpected identifier instead of the token after it (sxzzzyzv)
 - Allow fields named `argument_list` or `missing_argument_errors`, which clashed with locals in generated code (vrtqvqnq)
 - Reject fields with duplicate argument names (via `rename`), which previously made one of them impossible to set (owonzqoy)
+- Fields with raw names like `r#type` now take the argument `type` instead of `r#type`; both spellings are accepted (zunuotso)
 
 ## v0.3.3 - 2026-10-03
 Rename crate to `macro-kwargs`.

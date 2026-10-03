@@ -1,7 +1,8 @@
-use std::collections::{BTreeSet, HashMap};
+use std::collections::{BTreeMap, BTreeSet};
 
 use proc_macro2::{Ident, TokenStream};
 use quote::{format_ident, quote, quote_spanned};
+use syn::ext::IdentExt;
 use syn::parse::{Parse, ParseStream};
 use syn::spanned::Spanned;
 use syn::{Attribute, Data, DeriveInput, Error, Fields, LitStr, Path, Token, Type};
@@ -37,15 +38,17 @@ pub fn run_derive(input: &DeriveInput) -> Result<TokenStream, syn::Error> {
     let mut arg_name_strings = Vec::new();
     let mut parse_invocations = Vec::new();
     // maps each argument name to the field that uses it
-    let mut fields_by_arg_name: HashMap<String, &Ident> = HashMap::new();
+    let mut fields_by_arg_name: BTreeMap<String, &Ident> = BTreeMap::new();
     let mut duplicate_name_error: Option<Error> = None;
     for field in &named_fields.named {
         use heck::ToUpperCamelCase;
         let mut attr = FieldAttrs::find_attr(&field.attrs)?.unwrap_or_default();
         let ident = field.ident.as_ref().unwrap();
+        // strip the `r#` from raw identifiers like `r#type`
+        let unraw_ident = ident.unraw();
         let (arg_name, arg_name_span) = match attr.rename {
             Some(ref renamed) => (renamed.value(), renamed.span()),
-            None => (ident.to_string(), ident.span()),
+            None => (unraw_ident.to_string(), ident.span()),
         };
         if let Some(existing) = fields_by_arg_name.insert(arg_name.clone(), ident) {
             let error = Error::new(
@@ -57,7 +60,7 @@ pub fn run_derive(input: &DeriveInput) -> Result<TokenStream, syn::Error> {
                 None => duplicate_name_error = Some(error),
             }
         }
-        let variant_name = Ident::new(&ident.to_string().to_upper_camel_case(), ident.span());
+        let variant_name = Ident::new(&unraw_ident.to_string().to_upper_camel_case(), ident.span());
         variant_names.push(variant_name.clone());
         arg_name_strings.push(arg_name);
         parsed_arg_types.push(&field.ty);

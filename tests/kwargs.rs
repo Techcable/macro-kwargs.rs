@@ -257,3 +257,29 @@ fn clashing_field_names() {
     let err = syn::parse_str::<ClashingFieldNames>("argument_list => 1").unwrap_err();
     assert_eq!(err.to_string(), "Missing required argument `other`");
 }
+
+#[derive(MacroKeywordArgs, Debug, PartialEq)]
+pub struct RawFieldNames {
+    r#type: syn::Ident,
+    #[kwarg(optional)]
+    r#match: u32,
+}
+
+#[test]
+fn raw_field_names() {
+    let expected = RawFieldNames {
+        r#type: syn::parse_quote!(foo),
+        r#match: 3,
+    };
+    assert_eq!(
+        syn::parse_str::<RawFieldNames>("type => foo, match => 3").unwrap(),
+        expected
+    );
+    // the raw form is also accepted
+    assert_eq!(
+        syn::parse_str::<RawFieldNames>("r#type => foo, r#match => 3").unwrap(),
+        expected
+    );
+    let err = syn::parse_str::<RawFieldNames>("match => 3").unwrap_err();
+    assert_eq!(err.to_string(), "Missing required argument `type`");
+}

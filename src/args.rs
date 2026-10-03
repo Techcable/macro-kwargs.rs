@@ -51,7 +51,8 @@ pub struct KeywordArg<K: MacroKeywordArgs> {
 impl<K: MacroKeywordArgs> Parse for KeywordArg<K> {
     fn parse(stream: ParseStream) -> syn::Result<Self> {
         let name = stream.call(Ident::parse_any)?;
-        let name_text = name.to_string();
+        // accept both `type` and `r#type`
+        let name_text = name.unraw().to_string();
         let id = K::ArgId::from_name(&name_text).ok_or_else(|| {
             syn::Error::new(name.span(), format!("Unknown argument name: {name_text}"))
         })?;
