@@ -12,6 +12,9 @@ Most newer changes include the relevant [jj](https://jj-vcs.dev) change ids in p
 
 ## Unreleased
 
+### Added
+- Implement `Debug` for `NestedDict` (kwsztwtm)
+
 ### Changed
 - Declare minimum supported rust version of 1.71 (mrvqwsux)
   - This is the oldest version that syn v3 supports.

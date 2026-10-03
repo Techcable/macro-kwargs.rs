@@ -1,4 +1,5 @@
 //! Utilities for parsing
+use std::fmt::Debug;
 use std::hash::Hash;
 use std::marker::PhantomData;
 use std::ops::{Deref, DerefMut};
@@ -158,6 +159,11 @@ impl<K: MacroDictKey, V: MacroArg> DerefMut for NestedDict<K, V> {
     #[inline]
     fn deref_mut(&mut self) -> &mut Self::Target {
         &mut self.elements
+    }
+}
+impl<K: MacroDictKey + Debug, V: MacroArg + Debug> Debug for NestedDict<K, V> {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        f.debug_tuple("NestedDict").field(&self.elements).finish()
     }
 }
 
