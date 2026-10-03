@@ -59,3 +59,6 @@ cargo = { level = "warn", priority = -1 }
 inconsistent_struct_constructor = "allow"
 default_trait_access = "allow"
 needless_raw_string_hashes = "allow"
+too_many_lines = "allow"
+needless_continue = "allow"
+redundant_else = "allow"

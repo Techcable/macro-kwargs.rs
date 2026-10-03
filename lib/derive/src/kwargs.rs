@@ -38,11 +38,11 @@ pub fn run_derive(input: &DeriveInput) -> Result<TokenStream, syn::Error> {
     let mut parsed_arg_types = Vec::new();
     let mut arg_name_strings = Vec::new();
     let mut parse_invocations = Vec::new();
-    for field in named_fields.named.iter() {
+    for field in &named_fields.named {
+        use heck::ToUpperCamelCase;
         let mut attr = FieldAttrs::find_attr(&field.attrs)?.unwrap_or_default();
         let ident = field.ident.as_ref().unwrap();
         let arg_name = attr.rename.clone().unwrap_or_else(|| ident.to_string());
-        use heck::ToUpperCamelCase;
         let variant_name = Ident::new(&ident.to_string().to_upper_camel_case(), ident.span());
         variant_names.push(variant_name.clone());
         arg_name_strings.push(arg_name);
@@ -73,7 +73,7 @@ pub fn run_derive(input: &DeriveInput) -> Result<TokenStream, syn::Error> {
                         let wrapper = <#wrapper_ty as macro_kwargs::MacroArg>::parse_macro_arg(stream)?;
                         #with_wrapper_conversion
                     }
-                ))
+                ));
             }
             (None, None) => {
                 parse_invocations.push(quote_spanned!(
@@ -121,7 +121,7 @@ pub fn run_derive(input: &DeriveInput) -> Result<TokenStream, syn::Error> {
                     }
                 };
             });
-            field_inits.push(quote!(#ident: #ident.unwrap()))
+            field_inits.push(quote!(#ident: #ident.unwrap()));
         }
     }
     let (impl_generics, ty_generics, where_clause) = input.generics.split_for_impl();

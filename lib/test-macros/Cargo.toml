@@ -14,3 +14,6 @@ proc-macro = true
 macro-kwargs = { path = "../.." }
 syn = { workspace = true, features = ["proc-macro"] }
 proc-macro2 = { workspace = true, features = ["proc-macro"] }
+
+[lints]
+workspace = true
