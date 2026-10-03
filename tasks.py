@@ -38,9 +38,23 @@ def check(ctx, format=True):
     ctx.run(
         "cargo +nightly doc --document-private-items --no-deps --workspace --all-features"
     )
+    cargo_reedme(ctx, check=True)
     # by default, check formatting as well
     if format:
         run_format(ctx, check=True)
+
+
+REEDME_SYNC_PKGS = ["macro-kwargs"]
+
+
+@task
+def cargo_reedme(ctx, check=False):
+    args = ["cargo", "reedme"]
+    if check:
+        args.append("--check")
+    for pkg in REEDME_SYNC_PKGS:
+        args.extend(("-p", pkg))
+    ctx.run(shlex.join(args))
 
 
 @task
@@ -72,7 +86,7 @@ def check_spelling(ctx, fix=False):
     ctx.run(f"uvx typos@{TYPOS_VER}" + maybe_write)
 
 
-ns = Collection(test, check, clippy, run_format, check_spelling)
+ns = Collection(test, check, clippy, cargo_reedme, run_format, check_spelling)
 ns.configure(
     {
         "run": {

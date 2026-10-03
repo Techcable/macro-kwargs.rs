@@ -151,6 +151,39 @@ jobs:
         run: |
           cargo docs-rs -p ${{ matrix.package }}
 
+  cargo-reedme:
+    # Only run on PRs if the source branch is on someone else's repo
+    if: ${{ github.event_name != 'pull_request' || github.repository != github.event.pull_request.head.repo.full_name }}
+
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dtolnay/rust-toolchain@nightly  # cargo-reedme requires nightly
+        with:
+          components: rust-src
+      - uses: taiki-e/cache-cargo-install-action@v3  # not supported by regular install action
+        with:
+          tool: cargo-reedme
+      - uses: Swatinem/rust-cache@v2
+        with:
+          # cached separately
+          cache-bin: false
+      - name: Setup python
+        id: setup-python
+        uses: actions/setup-python@v6
+      - name: Setup uv
+        id: setup-uv
+        uses: astral-sh/setup-uv@v10.0.1
+      - name: Install pyinvoke
+        id: install-pyinvoke
+        run: |
+          uv tool install invoke
+      - name: Run cargo-reedme
+        # We only want to sync the readmes of a subset of packages for reasons explained in tasks.py.
+        # Delegate to pyinvoke in order to keep the list of packages in one central place.
+        run: |
+          invoke cargo-reedme --check
+
   typos:
     # Only run on PRs if the source branch is on someone else's repo
     if: ${{ github.event_name != 'pull_request' || github.repository != github.event.pull_request.head.repo.full_name }}
@@ -213,6 +246,7 @@ jobs:
       - clippy
       - docs
       - docs-rs
+      - cargo-reedme
       - typos
       - rustfmt
       - tombi

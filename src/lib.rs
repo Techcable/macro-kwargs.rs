@@ -1,4 +1,32 @@
-//! Keyword argument parsing for function-like procedural macros.
+//! Keyword argument parsing for function-like procedural macros (Rust).
+//!
+//! ## Example
+//! ```
+//! # macro_rules! example_macro { ($($x:tt)*) => {} };
+//! example_macro!(
+//!    name => bar,
+//!    foo => i32
+//! );
+//! ```
+//!
+//! And here is the corresponding code in the proc macro:
+//!
+//! ```
+//! # use macro_kwargs::MacroKeywordArgs;
+//! # use proc_macro2::Ident;
+//! #[derive(MacroKeywordArgs)]
+//! struct MacroArgs {
+//!     name: Ident,
+//!     #[kwarg(optional)]
+//!     optional: Option<syn::Expr>,
+//!     #[kwarg(rename = "foo")]
+//!     tp: syn::Type
+//! }
+//! ```
+//!
+//! See [`tests/kwargs.rs`] for more detailed examples.
+//!
+//! [`tests/kwargs.rs`]: https://github.com/Techcable/macro-kwargs.rs/blob/master/tests/kwargs.rs
 #![deny(missing_docs)]
 pub use macro_kwargs_derive::MacroKeywordArgs;
 
