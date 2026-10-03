@@ -5,6 +5,7 @@ use std::marker::PhantomData;
 use std::ops::{Deref, DerefMut};
 
 use indexmap::IndexMap;
+use indexmap::map::Entry;
 use proc_macro2::{Ident, TokenStream};
 use quote::ToTokens;
 use syn::parse::{Parse, ParseStream};
@@ -125,14 +126,25 @@ impl<K: MacroDictKey, V: MacroArg> NestedDict<K, V> {
         &mut self,
         iter: impl Iterator<Item = KeyValuePair<K, V>>,
     ) -> Result<(), syn::Error> {
+        // report every duplicate key, not just the first
+        let mut errors = Vec::new();
         for pair in iter {
+            // point at the duplicate, not the original key
             let key_span = pair.key.span();
-            let existing = self.elements.insert(pair.key, pair.value);
-            if existing.is_some() {
-                return Err(syn::Error::new(key_span, "Duplicate keys"));
+            match self.elements.entry(pair.key) {
+                Entry::Occupied(_) => {
+                    errors.push(syn::Error::new(key_span, "Duplicate keys"));
+                }
+                Entry::Vacant(entry) => {
+                    entry.insert(pair.value);
+                }
             }
         }
-        Ok(())
+        if errors.is_empty() {
+            Ok(())
+        } else {
+            Err(crate::combine_errors(errors))
+        }
     }
 }
 impl<K: MacroDictKey, V: MacroArg> MacroArg for NestedDict<K, V> {
@@ -431,5 +443,19 @@ mod test {
         check("Foo", 0);
         check("  Foo(5)", 2);
         check("5", 0);
+    }
+    #[test]
+    fn nested_dict_duplicate_keys() {
+        let err = parse_str::<NestedDict<Ident, u32>>("{a => 1, a => 2, b => 3, b => 4, c => 5}")
+            .unwrap_err();
+        // relies on the `span-locations` feature of proc-macro2 (enabled in dev-dependencies)
+        let columns = err
+            .into_iter()
+            .map(|e| {
+                assert_eq!(e.to_string(), "Duplicate keys");
+                e.span().start().column
+            })
+            .collect::<Vec<_>>();
+        assert_eq!(columns, [9, 25]);
     }
 }
