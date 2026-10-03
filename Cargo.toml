@@ -26,7 +26,8 @@ workspace = true
 
 [workspace]
 resolver = "2"
-members = ["lib/derive", "lib/test-macros"]
+members = [".", "lib/derive", "lib/test-macros"]
+default-members = [".", "lib/derive", "lib/test-macros"]
 
 [workspace.package]
 version = "0.3.3"
