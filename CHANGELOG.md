@@ -12,6 +12,9 @@ Most newer changes include the relevant [jj](https://jj-vcs.dev) change ids in p
 
 ## Unreleased
 
+## v0.3.1 - 2026-10-03
+Update to syn v3
+
 ### Changes
 - *BREAKING*: Update to syn v3
 
