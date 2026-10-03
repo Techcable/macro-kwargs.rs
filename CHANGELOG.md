@@ -37,6 +37,8 @@ Most newer changes include the relevant [jj](https://jj-vcs.dev) change ids in p
 - Reject fields with duplicate argument names (via `rename`), which previously made one of them impossible to set (owonzqoy)
 - Fields with raw names like `r#type` now take the argument `type` instead of `r#type`; both spellings are accepted (zunuotso)
 - `NestedDict` reports every duplicate key, instead of stopping at the first one (xuuxssvv)
+- Correct the docs for `ParsedKeywordArguments` ordering: arguments are in the order the user wrote them, not the order the fields are declared in (rwmympok)
+  - This was already the actual behavior; only the documentation was wrong.
 
 ## v0.3.3 - 2026-10-03
 Rename crate to `macro-kwargs`.

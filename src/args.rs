@@ -63,7 +63,7 @@ impl<K: MacroKeywordArgs> Parse for KeywordArg<K> {
 }
 /// The list of parsed keyword arguments
 pub struct ParsedKeywordArguments<K: MacroKeywordArgs> {
-    /// A map of arguments, in the order of the declaration.
+    /// A map of arguments, in the order the user wrote the arguments.
     by_name: IndexMap<K::ArgId, KeywordArg<K>>,
     /// The span of the whole argument list,
     /// used for errors about missing arguments.
@@ -87,7 +87,8 @@ impl<K: MacroKeywordArgs> ParsedKeywordArguments<K> {
     /// Consume the argument with the specified id,
     /// returning `None` if it's missing
     ///
-    /// Implicitly shifts the ordering of the map.
+    /// This changes the order of the remaining arguments:
+    /// the last argument is moved into the removed argument's place.
     pub fn take(&mut self, id: K::ArgId) -> Option<KeywordArg<K>> {
         self.by_name.swap_remove(&id)
     }
@@ -106,8 +107,14 @@ impl<K: MacroKeywordArgs> ParsedKeywordArguments<K> {
             )
         })
     }
-    /// Iterate over the original list of arguments,
-    /// in the order of their declaration
+    /// Iterate over the arguments,
+    /// in the order the user wrote the arguments.
+    ///
+    /// This is the order they appear in the macro input,
+    /// which may differ from the order the struct's fields are declared in.
+    ///
+    /// Arguments consumed by [`take`](Self::take) or [`require`](Self::require)
+    /// are skipped, and consuming them changes the order of the rest.
     #[inline]
     pub fn iter(&self) -> impl Iterator<Item = &'_ KeywordArg<K>> + '_ {
         self.by_name.values()

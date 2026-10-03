@@ -283,3 +283,20 @@ fn raw_field_names() {
     let err = syn::parse_str::<RawFieldNames>("match => 3").unwrap_err();
     assert_eq!(err.to_string(), "Missing required argument `type`");
 }
+
+/// `ParsedKeywordArguments::iter` yields arguments in the order the user wrote them,
+/// not the order the fields are declared in.
+#[test]
+fn iter_order_matches_input() {
+    use macro_kwargs::args::ParsedKeywordArguments;
+    // the reverse of the field declaration order in `ExampleArgs`
+    let args = syn::parse_str::<ParsedKeywordArguments<ExampleArgs>>(
+        r#"opt => true, foo => "str", first => 1"#,
+    )
+    .unwrap();
+    let names = args
+        .iter()
+        .map(|arg| arg.name.to_string())
+        .collect::<Vec<_>>();
+    assert_eq!(names, ["opt", "foo", "first"]);
+}
