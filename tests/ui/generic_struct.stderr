@@ -1,0 +1,11 @@
+error: Generic structs are currently unsupported
+ --> tests/ui/generic_struct.rs:5:17
+  |
+5 | struct TypeParam<T: MacroArg> {
+  |                 ^^^^^^^^^^^^^
+
+error: Generic structs are currently unsupported
+  --> tests/ui/generic_struct.rs:10:21
+   |
+10 | struct LifetimeParam<'a> {
+   |                     ^^^^

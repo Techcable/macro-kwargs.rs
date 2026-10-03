@@ -27,6 +27,13 @@ pub fn run_derive(input: &DeriveInput) -> Result<TokenStream, syn::Error> {
         }
         Fields::Unit => return Err(Error::new(input.ident.span(), "Unit structs are forbidden")),
     };
+    if !input.generics.params.is_empty() {
+        // the generated enums would need the same generic parameters
+        return Err(Error::new_spanned(
+            &input.generics,
+            "Generic structs are currently unsupported",
+        ));
+    }
     let original_ident = &input.ident;
     let original_vis = &input.vis;
     let id_enum_name = format_ident!("{}ArgId", input.ident);

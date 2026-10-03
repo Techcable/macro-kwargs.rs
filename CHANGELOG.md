@@ -43,6 +43,7 @@ Most newer changes include the relevant [jj](https://jj-vcs.dev) change ids in p
 - Allow a trailing comma in `#[kwarg(...)]`, like `#[kwarg(optional,)]` (xwwsquxv)
 - Fix derive failing on fields whose names differ only in case or underscores, like `foo_bar` and `foo__bar` (loplrtmk)
   - Avoid `non_snake_case` warnings in generated code for fields that aren't snake case.
+- Reject generic structs in the derive with a clear error, instead of failing with confusing errors in generated code (klptmunk)
 
 ## v0.3.3 - 2026-10-03
 Rename crate to `macro-kwargs`.
