@@ -32,7 +32,7 @@ default-members = [".", "lib/derive", "lib/test-macros"]
 [workspace.package]
 version = "0.3.3"
 edition = "2021"
-license = "MIT"
+license = "MIT OR Apache-2.0"
 repository = "https://github.com/Techcable/macro-kwargs.rs"
 # 1.56 - 2021 edition
 # 1.64 - workspace.package

@@ -15,6 +15,8 @@ Most newer changes include the relevant [jj](https://jj-vcs.dev) change ids in p
 ### Changed
 - Declare minimum supported rust version of 1.71 (mrvqwsux)
   - This is the oldest version that syn v3 supports.
+- Relicense from MIT to [`MIT OR Apache-2.0`](https://spdx.dev/ids) (kxrrqpts)
+  - Since the MIT license is still an option, this change actually makes licensing more permissive.
 
 ### Fixed
 - Fix span of missing argument errors in nested structs (pnrqmzup)
