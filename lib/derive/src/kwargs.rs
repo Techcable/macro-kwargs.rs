@@ -33,7 +33,6 @@ pub fn run_derive(input: &DeriveInput) -> Result<TokenStream, syn::Error> {
     let id_enum_name = format_ident!("{}ArgId", input.ident);
     let parsed_arg_name = format_ident!("{}ParsedArg", input.ident);
     let mut variant_names = Vec::new();
-    let mut field_names = Vec::new();
     let mut field_declarations = Vec::new();
     let mut field_inits = Vec::new();
     let mut parsed_arg_types = Vec::new();
@@ -82,7 +81,6 @@ pub fn run_derive(input: &DeriveInput) -> Result<TokenStream, syn::Error> {
                 ));
             }
         }
-        field_names.push(ident.clone());
         /*
          * In order to produce good errors,
          * field initialization has three phases:
@@ -123,7 +121,7 @@ pub fn run_derive(input: &DeriveInput) -> Result<TokenStream, syn::Error> {
                     }
                 };
             });
-            field_inits.push(quote!(#ident.unwrap()))
+            field_inits.push(quote!(#ident: #ident.unwrap()))
         }
     }
     let (impl_generics, ty_generics, where_clause) = input.generics.split_for_impl();
@@ -184,7 +182,7 @@ pub fn run_derive(input: &DeriveInput) -> Result<TokenStream, syn::Error> {
                     return Err(macro_kwargs::combine_errors(missing_argument_errors));
                 }
                 Ok(#original_ident {
-                    #(#field_names: #field_inits),*
+                    #(#field_inits),*
                 })
             }
         }
