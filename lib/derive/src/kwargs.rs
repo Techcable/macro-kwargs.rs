@@ -1,3 +1,5 @@
+use std::collections::BTreeSet;
+
 use proc_macro2::{Ident, TokenStream};
 use quote::{format_ident, quote, quote_spanned};
 use syn::{
@@ -241,62 +243,93 @@ impl FieldAttrs {
 }
 impl Parse for FieldAttrs {
     fn parse(stream: ParseStream) -> syn::Result<Self> {
+        #[derive(Copy, Clone, PartialEq, Eq, Ord, PartialOrd)]
+        enum Attr {
+            Optional,
+            Rename,
+            WithFunc,
+            WithWrapper,
+        }
+        macro_rules! declare_names {
+            ($($variant:ident => [$primary:literal $(, $($secondary:literal),*)?]),+ $(,)?) => {
+                impl Attr {
+                    fn name(self) -> &'static str {
+                        match self {
+                            $(Attr::$variant => $primary,)*
+                        }
+                    }
+                    fn from_name(s: &str) -> Option<Self> {
+                        match s {
+                            $($primary $($(| $secondary)*)* => Some(Attr::$variant),)*
+                            _ => None,
+                        }
+                    }
+                }
+            }
+        }
+        declare_names! {
+            Optional => ["optional"],
+            Rename => ["rename"],
+            WithFunc => ["with_func"],
+            WithWrapper => ["with_wrapper"],
+        }
+        impl Attr {
+            fn is_with_opt(self) -> bool {
+                matches!(self, Attr::WithFunc | Attr::WithWrapper)
+            }
+            fn conflicts_with(self, other: Attr) -> bool {
+                self.is_with_opt() && other.is_with_opt()
+            }
+        }
+
         let mut res = Self::default();
+        // using BTreeSet gives deterministic errors
+        let mut existing_opts = BTreeSet::new();
         loop {
             let name: Ident = stream.parse()?;
-            match &*name.to_string() {
-                "optional" => {
-                    if res.optional {
-                        return Err(Error::new(
-                            name.span(),
-                            "Already specified `optional` attribute",
-                        ));
-                    }
+            let opt = Attr::from_name(&name.to_string())
+                .ok_or_else(|| Error::new(name.span(), "Unknown option name"))?;
+            // check for conflicts & duplicates
+            if existing_opts.contains(&opt) {
+                return Err(Error::new(
+                    name.span(),
+                    format!("Already specified `{}` attribute", opt.name()),
+                ));
+            }
+            for &other in &existing_opts {
+                if opt.conflicts_with(other) {
+                    return Err(Error::new(
+                        name.span(),
+                        format!(
+                            "The `{}` option conflicts with the `{}` option",
+                            opt.name(),
+                            other.name(),
+                        ),
+                    ));
+                }
+            }
+            // now that we've verified there are no conflicts, add it to the set
+            assert!(existing_opts.insert(opt));
+
+            match opt {
+                Attr::Optional => {
                     res.optional = true;
                 }
-                "rename" => {
-                    if res.rename.is_some() {
-                        return Err(Error::new(name.span(), "Already specified `rename` option"));
-                    }
+                Attr::Rename => {
                     stream.parse::<Token![=]>()?;
                     let renamed = stream.parse::<LitStr>()?;
                     res.rename = Some(renamed.value());
                 }
-                "with_func" => {
-                    if res.with_func.is_some() {
-                        return Err(Error::new(
-                            name.span(),
-                            "Already specified `with_func` option",
-                        ));
-                    }
-                    if res.with_wrapper.is_some() {
-                        return Err(Error::new(
-                            name.span(),
-                            "The `with_func` option conflicts with the `with_wrapper` option",
-                        ));
-                    }
+                Attr::WithFunc => {
                     stream.parse::<Token![=]>()?;
                     let s = stream.parse::<LitStr>()?;
                     res.with_func = Some(s.parse::<syn::Path>()?);
                 }
-                "with_wrapper" => {
-                    if res.with_wrapper.is_some() {
-                        return Err(Error::new(
-                            name.span(),
-                            "Already specified `with_wrapper` option",
-                        ));
-                    }
-                    if res.with_func.is_some() {
-                        return Err(Error::new(
-                            name.span(),
-                            "The `with_wrapper` option conflicts with the `with_func` option",
-                        ));
-                    }
+                Attr::WithWrapper => {
                     stream.parse::<Token![=]>()?;
                     let s = stream.parse::<LitStr>()?;
                     res.with_wrapper = Some(s.parse::<Type>()?);
                 }
-                _ => return Err(Error::new(name.span(), "Unknown option name")),
             }
             if stream.peek(Token![,]) {
                 stream.parse::<Token![,]>()?;
