@@ -318,3 +318,32 @@ fn trailing_comma_attrs() {
         TrailingCommaAttrs { a: 0, b: 2 }
     );
 }
+
+/// Distinct field names must produce distinct generated enum variants,
+/// even if they would be the same when converted to `UpperCamelCase`.
+#[derive(MacroKeywordArgs, Debug, PartialEq)]
+#[allow(non_snake_case)]
+pub struct SimilarFieldNames {
+    foo_bar: u32,
+    foo__bar: u32,
+    fooBar: u32,
+    r#type: u32,
+    type_: u32,
+}
+
+#[test]
+fn similar_field_names() {
+    assert_eq!(
+        syn::parse_str::<SimilarFieldNames>(
+            "foo_bar => 1, foo__bar => 2, fooBar => 3, type => 4, type_ => 5"
+        )
+        .unwrap(),
+        SimilarFieldNames {
+            foo_bar: 1,
+            foo__bar: 2,
+            fooBar: 3,
+            r#type: 4,
+            type_: 5,
+        }
+    );
+}

@@ -41,7 +41,6 @@ pub fn run_derive(input: &DeriveInput) -> Result<TokenStream, syn::Error> {
     let mut fields_by_arg_name: BTreeMap<String, &Ident> = BTreeMap::new();
     let mut duplicate_name_error: Option<Error> = None;
     for field in &named_fields.named {
-        use heck::ToUpperCamelCase;
         let mut attr = FieldAttrs::find_attr(&field.attrs)?.unwrap_or_default();
         let ident = field.ident.as_ref().unwrap();
         // strip the `r#` from raw identifiers like `r#type`
@@ -60,7 +59,9 @@ pub fn run_derive(input: &DeriveInput) -> Result<TokenStream, syn::Error> {
                 None => duplicate_name_error = Some(error),
             }
         }
-        let variant_name = Ident::new(&unraw_ident.to_string().to_upper_camel_case(), ident.span());
+        // Use the field name as-is (with a prefix), so distinct fields always get
+        // distinct variants and keywords like `type` are still valid.
+        let variant_name = format_ident!("_Id_{unraw_ident}", span = ident.span());
         variant_names.push(variant_name.clone());
         arg_name_strings.push(arg_name);
         parsed_arg_types.push(&field.ty);
@@ -154,6 +155,7 @@ pub fn run_derive(input: &DeriveInput) -> Result<TokenStream, syn::Error> {
     Ok(quote! {
         #[derive(Copy, Clone, Debug, Eq, PartialEq, Hash)]
         #[doc(hidden)]
+        #[allow(non_camel_case_types)]
         #original_vis enum #id_enum_name {
             #(#variant_names),*
         }
@@ -172,6 +174,7 @@ pub fn run_derive(input: &DeriveInput) -> Result<TokenStream, syn::Error> {
             }
         }
         #[doc(hidden)]
+        #[allow(non_camel_case_types)]
         #original_vis enum #parsed_arg_name {
             #(#variant_names ( #parsed_arg_types )),*
         }
@@ -199,6 +202,8 @@ pub fn run_derive(input: &DeriveInput) -> Result<TokenStream, syn::Error> {
                 for #original_ident #ty_generics #where_clause {
             type ArgId = #id_enum_name;
             type ParsedArg = #parsed_arg_name;
+            // the locals for each field are named after it, which may not be snake case
+            #[allow(non_snake_case)]
             fn from_keyword_args(mut argument_list: macro_kwargs::args::ParsedKeywordArguments<Self>) -> macro_kwargs::__private::syn::Result<Self> {
                 #[allow(unused_imports)] // Possible if empty
                 use macro_kwargs::args::ParsedArgValue;
