@@ -62,10 +62,12 @@ macro_rules! macro_arg_parse_int {
 /// Implements [`MacroArg`] via syn's [`Parse`] trait
 #[macro_export]
 macro_rules! parse_macro_arg_via_syn {
-    ($target:path) => (parse_macro_arg_via_syn!($target; for <>););
+    ($target:path) => ($crate::parse_macro_arg_via_syn!($target; for <>););
     ($target:path; for <$($lt:lifetime,)* $($param:ident),*> $(where $($where_tks:tt)*)?) => {
         impl<$($lt,)* $($param),*> $crate::parse::MacroArg for $target $(where $($where_tks)* )* {
-            fn parse_macro_arg(stream: syn::parse::ParseStream) -> syn::Result<Self> {
+            fn parse_macro_arg(
+                stream: $crate::__private::syn::parse::ParseStream,
+            ) -> $crate::__private::syn::Result<Self> {
                 stream.parse()
             }
         }

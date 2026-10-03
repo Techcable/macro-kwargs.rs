@@ -211,3 +211,23 @@ fn without_syn_in_scope() {
         }
     );
 }
+
+/// `parse_macro_arg_via_syn!` must work when invoked by its full path,
+/// without importing it or having `syn` in scope.
+mod via_syn_macro {
+    mod syn {}
+
+    pub struct Wrapped(pub ::syn::Ident);
+    impl ::syn::parse::Parse for Wrapped {
+        fn parse(stream: ::syn::parse::ParseStream) -> ::syn::Result<Self> {
+            Ok(Wrapped(stream.parse()?))
+        }
+    }
+    macro_kwargs::parse_macro_arg_via_syn!(Wrapped);
+}
+
+#[test]
+fn via_syn_macro() {
+    let wrapped = macro_kwargs::parse::parse_str::<via_syn_macro::Wrapped>("foo").unwrap();
+    assert_eq!(wrapped.0, "foo");
+}
