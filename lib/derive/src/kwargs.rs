@@ -40,7 +40,7 @@ pub fn run_derive(input: &DeriveInput) -> Result<TokenStream, syn::Error> {
     let mut arg_name_strings = Vec::new();
     let mut parse_invocations = Vec::new();
     for field in named_fields.named.iter() {
-        let attr = FieldAttrs::find_attr(&field.attrs)?.unwrap_or_default();
+        let mut attr = FieldAttrs::find_attr(&field.attrs)?.unwrap_or_default();
         let ident = field.ident.as_ref().unwrap();
         let arg_name = attr.rename.clone().unwrap_or_else(|| ident.to_string());
         use heck::ToUpperCamelCase;
@@ -49,18 +49,30 @@ pub fn run_derive(input: &DeriveInput) -> Result<TokenStream, syn::Error> {
         arg_name_strings.push(arg_name);
         parsed_arg_types.push(&field.ty);
         let field_ty = &field.ty;
+        // For now, only used for `with_syn`
+        let mut custom_with_wrapper_conversion = None;
+        // implement `with_syn` by reducing to `with_wrapper` with custom conversion
+        if std::mem::replace(&mut attr.with_syn, false) {
+            attr.with_wrapper = Some(syn::parse_quote_spanned! {
+                field_ty.span() => proc_macro_kwargs::parse::Syn::<#field_ty>
+            });
+            custom_with_wrapper_conversion = Some(quote!(wrapper.into_inner()));
+        }
         match (attr.with_func.as_ref(), attr.with_wrapper.as_ref()) {
             (Some(_), Some(_)) => unreachable!("conflicting 'with' options"),
             (Some(with_func), None) => {
                 parse_invocations.push(quote_spanned!(
                     with_func.span() => #with_func ?
                 ));
-            },
+            }
             (None, Some(wrapper_ty)) => {
+                let with_wrapper_conversion = custom_with_wrapper_conversion.unwrap_or_else(
+                    || quote!(<#wrapper_ty as core::convert::Into::<#field_ty>>::into(wrapper)),
+                );
                 parse_invocations.push(quote_spanned!(
                     wrapper_ty.span() => {
                         let wrapper = <#wrapper_ty as proc_macro_kwargs::MacroArg>::parse_macro_arg(stream)?;
-                        <#wrapper_ty as core::convert::Into::<#field_ty>>::into(wrapper)
+                        #with_wrapper_conversion
                     }
                 ))
             }
@@ -212,6 +224,10 @@ struct FieldAttrs {
     /// Parse the value by delegating to the specified "wrapper"
     /// type, then converts it to the actual type via `Into`
     with_wrapper: Option<Type>,
+    /// If true, parses using the syn [`syn::Parse`] trait.
+    ///
+    /// Equivalent to `with_wrapper = proc_macro_kwargs::parse::Syn`.
+    with_syn: bool,
 }
 #[allow(clippy::derivable_impls)]
 impl Default for FieldAttrs {
@@ -221,6 +237,7 @@ impl Default for FieldAttrs {
             rename: None,
             with_func: None,
             with_wrapper: None,
+            with_syn: false,
         }
     }
 }
@@ -249,6 +266,7 @@ impl Parse for FieldAttrs {
             Rename,
             WithFunc,
             WithWrapper,
+            WithSyn,
         }
         macro_rules! declare_names {
             ($($variant:ident => [$primary:literal $(, $($secondary:literal),*)?]),+ $(,)?) => {
@@ -272,10 +290,11 @@ impl Parse for FieldAttrs {
             Rename => ["rename"],
             WithFunc => ["with_func"],
             WithWrapper => ["with_wrapper"],
+            WithSyn => ["with_syn", "syn"],
         }
         impl Attr {
             fn is_with_opt(self) -> bool {
-                matches!(self, Attr::WithFunc | Attr::WithWrapper)
+                matches!(self, Attr::WithFunc | Attr::WithWrapper | Attr::WithSyn)
             }
             fn conflicts_with(self, other: Attr) -> bool {
                 self.is_with_opt() && other.is_with_opt()
@@ -329,6 +348,9 @@ impl Parse for FieldAttrs {
                     stream.parse::<Token![=]>()?;
                     let s = stream.parse::<LitStr>()?;
                     res.with_wrapper = Some(s.parse::<Type>()?);
+                }
+                Attr::WithSyn => {
+                    res.with_syn = true;
                 }
             }
             if stream.peek(Token![,]) {

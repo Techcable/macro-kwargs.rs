@@ -12,6 +12,14 @@ Most newer changes include the relevant [jj](https://jj-vcs.dev) change ids in p
 
 ## Unreleased
 
+### Added
+- Support a `#[kwarg(with_syn)]` shorthand to parse via [`syn::Parse`] instead of [`MacroArg`] (smwonvvz)
+  - More concise than using the [`proc_macro_kwargs::parse::Syn`] wrapper type (which doesn't even support `#[kwarg(with_wrapper)]`)
+  - Also available through the `#[kwarg(syn)]` shorthand
+
+[`syn::Parse`]: https://docs.rs/syn/latest/syn/parse/trait.Parse.html
+[`proc_macro_kwargs::parse::Syn`]:  https://docs.rs/proc-macro-kwargs/0.2.0/proc_macro_kwargs/parse/struct.Syn.html
+
 ## v0.2.0 - 2024-04-12
 Support stable rust.
 

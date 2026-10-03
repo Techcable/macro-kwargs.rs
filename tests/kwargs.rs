@@ -93,3 +93,41 @@ fn nesting() {
         }
     );
 }
+
+#[derive(MacroKeywordArgs, Debug, PartialEq)]
+pub struct SynExprArgs {
+    #[kwarg(syn)]
+    expr1: syn::Expr,
+    #[kwarg(with_syn, optional)]
+    keyword: syn::Token![self],
+}
+
+#[test]
+fn syn_expr() {
+    assert_eq!(
+        syn::parse_str::<SynExprArgs>(
+            r##"
+            expr1 => 3 + 7,
+            keyword => self,
+            "##
+        )
+        .unwrap(),
+        SynExprArgs {
+            expr1: syn::parse_quote!(3 + 7),
+            keyword: syn::parse_quote!(self),
+        }
+    );
+    assert_eq!(
+        syn::parse_str::<SynExprArgs>(
+            r##"
+            expr1 => 3 + 7,
+            "##
+        )
+        .unwrap(),
+        SynExprArgs {
+            expr1: syn::parse_quote!(3 + 7),
+            // keyword can be missing since it is optional
+            keyword: Default::default(),
+        }
+    );
+}
