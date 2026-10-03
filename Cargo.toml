@@ -6,6 +6,9 @@ license.workspace = true
 repository.workspace = true
 edition.workspace = true
 rust-version.workspace = true
+keywords.workspace = true
+categories.workspace = true
+readme.workspace = true
 
 [dependencies]
 quote = "1"
@@ -17,6 +20,9 @@ syn.workspace = true
 [dev-dependencies]
 trybuild = "1"
 macro-kwargs-test-macros = { path = "lib/test-macros" }
+
+[lints]
+workspace = true
 
 [workspace]
 resolver = "2"
@@ -31,6 +37,9 @@ repository = "https://github.com/Techcable/macro-kwargs.rs"
 # 1.64 - workspace.package
 # 1.71 - syn@3
 rust-version = "1.71"
+keywords = ["macro", "kwargs", "function", "parse", "args"]
+categories = ["development-tools::procedural-macro-helpers", "parsing"]
+readme = "README.md"
 
 [workspace.dependencies]
 proc-macro2 = { version = "1", default-features = false }
@@ -39,3 +48,14 @@ proc-macro2 = { version = "1", default-features = false }
 version = "3"
 default-features = false
 features = ["parsing", "printing", "derive", "extra-traits"]
+
+[workspace.lints.clippy]
+
+## groups ##
+pedantic = { level = "warn", priority = -1 }
+cargo = { level = "warn", priority = -1 }
+
+# excessively pedantic
+inconsistent_struct_constructor = "allow"
+default_trait_access = "allow"
+needless_raw_string_hashes = "allow"

@@ -14,6 +14,7 @@ pub use parse::MacroArg;
 ///
 /// NOTE: This is an internal implementation detail
 #[doc(hidden)]
+#[allow(clippy::must_use_candidate)] // could cause warnings in generated code
 pub fn combine_errors(errors: Vec<syn::Error>) -> syn::Error {
     let mut iter = errors.into_iter();
     let mut error = iter.next().expect("empty Vec");

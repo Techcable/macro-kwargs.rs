@@ -18,18 +18,21 @@ use syn::{braced, bracketed, parenthesized, Token};
 /// This is often implemented by delegating to syn's [Parse].
 ///
 /// However, sometimes it can behave differently.
-/// For example, nested [MacroKeywordArgs](crate::MacroKeywordArgs)
+/// For example, nested [`MacroKeywordArgs`](crate::MacroKeywordArgs)
 /// require surrounding braces `{}` when parsed as a `MacroArg`,
-/// but not when parsed via syn's [Parse].
+/// but not when parsed via syn's [`Parse`].
 ///
-/// This gives the effect of requiring braces when nested (as a MacroArg),
+/// This gives the effect of requiring braces when nested (as a [`MacroArg`]),
 /// but not at the top level (via syn's Parse).
 pub trait MacroArg: Sized {
     /// Parse the argument to the macro
+    ///
+    /// # Errors
+    /// Returns an error if the argument fails to parse.
     fn parse_macro_arg(stream: ParseStream) -> syn::Result<Self>;
 }
 
-/// Parses an optional [MacroArg],
+/// Parses an optional [`MacroArg]`,
 /// always returning the `Some` variant
 ///
 /// The `None` variant will only be generated
@@ -57,7 +60,7 @@ macro_rules! macro_arg_parse_int {
     };
 }
 
-/// Implements [MacroArg] via syn's [Parse] trait
+/// Implements [`MacroArg`] via syn's [`Parse`] trait
 #[macro_export]
 macro_rules! parse_macro_arg_via_syn {
     ($target:path) => (parse_macro_arg_via_syn!($target; for <>););
@@ -76,14 +79,14 @@ macro_arg_parse_map!(f64; via syn::LitFloat, |f| f.base10_parse::<f64>()?);
 macro_arg_parse_map!(f32; via syn::LitFloat, |f| f.base10_parse::<f32>()?);
 macro_arg_parse_map!(char; via syn::LitChar, |c| c.value());
 
-/// The key in a [NestedDict]
+/// The key in a [`NestedDict`]
 ///
 /// This is supposed to be a trait alias,
 /// but those are not yet stable.
 pub trait MacroDictKey: MacroArg + Eq + Hash + Spanned {}
-impl<T: ?Sized + MacroArg + Eq + Hash + Spanned> MacroDictKey for T {}
+impl<T: MacroArg + Eq + Hash + Spanned> MacroDictKey for T {}
 
-/// A pair of values in a [NestedDict]
+/// A pair of values in a [`NestedDict`]
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct KeyValuePair<K: MacroDictKey, V: MacroArg> {
     /// The key
@@ -211,7 +214,7 @@ pub struct NestedList<T: MacroArg, P = Token![,]> {
     pub brackets: syn::token::Bracket,
     /// The list of elements
     pub elements: Vec<T>,
-    /// PhantomData, for the Token
+    /// `PhantomData`, for the Token
     marker: PhantomData<P>,
 }
 impl<T: MacroArg, P: Default> From<Vec<T>> for NestedList<T, P> {
@@ -307,10 +310,10 @@ parse_macro_arg_via_syn!(syn::Meta);
 // TODO: What is the replacement for this in syn v2?
 // parse_macro_arg_via_syn!(syn::NestedMeta);
 parse_macro_arg_via_syn!(syn::Visibility);
-/// Wrapper type that parses via syn's [Parse] trait
+/// Wrapper type that parses via syn's [`Parse`] trait
 ///
 /// Through this wrapper, any AST node can be parsed
-/// as a [MacroArg]
+/// as a [`MacroArg`]
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Hash)]
 pub struct Syn<T: Parse>(pub T);
 impl<T: Parse> Syn<T> {
@@ -333,7 +336,7 @@ impl<T: Parse> Parse for Syn<T> {
 }
 impl<T: Parse + ToTokens> ToTokens for Syn<T> {
     fn to_tokens(&self, stream: &mut TokenStream) {
-        self.0.to_tokens(stream)
+        self.0.to_tokens(stream);
     }
     fn to_token_stream(&self) -> TokenStream {
         self.0.to_token_stream()
@@ -357,9 +360,12 @@ impl<T: Parse> DerefMut for Syn<T> {
 }
 parse_macro_arg_via_syn!(Syn::<T>; for <T> where T: Parse);
 
-/// Parses a `MacroArg` type from a string
+/// Parses a [`MacroArg`] type from a string
 ///
-/// Analogous to [syn::parse_str]
+/// Analogous to [`syn::parse_str`].
+///
+/// # Errors
+/// If the value fails to parse, returns an error.
 pub fn parse_str<T: MacroArg>(s: &str) -> syn::Result<T> {
     struct ParseWrapper<T: MacroArg>(T);
     impl<T: MacroArg> Parse for ParseWrapper<T> {

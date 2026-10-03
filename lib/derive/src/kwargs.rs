@@ -225,6 +225,8 @@ struct FieldAttrs {
     /// If true, parses using the syn [`syn::Parse`] trait.
     ///
     /// Equivalent to `with_wrapper = macro_kwargs::parse::Syn`.
+    ///
+    /// [`syn::Parse`]: https://docs.rs/syn/latest/syn/parse/trait.Parse.html
     with_syn: bool,
 }
 #[allow(clippy::derivable_impls)]

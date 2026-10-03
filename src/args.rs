@@ -18,6 +18,9 @@ pub trait ParsedArgValue<Id: KeywordArgId>: Sized {
     /// Return the corresponding id
     fn id(&self) -> Id;
     /// Parse the argument with the specified id
+    ///
+    /// # Errors
+    /// Returns an error if the value fails to parse.
     fn parse_with_id(id: Id, id_span: Span, stream: ParseStream) -> syn::Result<Self>;
 }
 /// The unique id for a single keyword argument
@@ -48,10 +51,7 @@ impl<K: MacroKeywordArgs> Parse for KeywordArg<K> {
         let name = stream.call(Ident::parse_any)?;
         let name_text = name.to_string();
         let id = K::ArgId::from_name(&name_text).ok_or_else(|| {
-            syn::Error::new(
-                name.span(),
-                format!("Unknown argument name: {}", &name_text),
-            )
+            syn::Error::new(name.span(), format!("Unknown argument name: {name_text}"))
         })?;
         stream.parse::<Token![=>]>()?;
         let value = K::ParsedArg::parse_with_id(id, name.span(), stream)?;
@@ -72,6 +72,7 @@ impl<K: MacroKeywordArgs> ParsedKeywordArguments<K> {
     /// For nested arguments, this is the span of the surrounding braces.
     /// At the top level, this defaults to [`Span::call_site`].
     #[inline]
+    #[must_use]
     pub fn span(&self) -> Span {
         self.span
     }
@@ -91,6 +92,9 @@ impl<K: MacroKeywordArgs> ParsedKeywordArguments<K> {
     /// returning an error if it is missing
     ///
     /// Consumes the argument, as if calling `take`
+    ///
+    /// # Errors
+    /// Returns an error if the specified argument is missing.
     pub fn require(&mut self, id: K::ArgId) -> syn::Result<KeywordArg<K>> {
         self.take(id).ok_or_else(|| {
             syn::Error::new(
@@ -112,7 +116,7 @@ impl<K: MacroKeywordArgs> Parse for ParsedKeywordArguments<K> {
             stream.call(Punctuated::parse_terminated)?;
         let mut by_name = IndexMap::with_capacity(punct.len());
         let mut errors = Vec::new();
-        for arg in punct.into_iter() {
+        for arg in punct {
             match by_name.entry(arg.id) {
                 Entry::Occupied(_entry) => {
                     errors.push(syn::Error::new(
@@ -157,5 +161,9 @@ pub trait MacroKeywordArgs: MacroArg + Parse {
     type ParsedArg: ParsedArgValue<Self::ArgId>;
     /// Create the parsed arguments struct from
     /// its list of arguments
+    ///
+    /// # Errors
+    /// Will error if any required arguments are missing,
+    /// or if the arguments are invalid.
     fn from_keyword_args(kwargs: ParsedKeywordArguments<Self>) -> Result<Self, syn::Error>;
 }
