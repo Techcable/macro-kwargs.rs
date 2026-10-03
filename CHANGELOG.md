@@ -12,13 +12,16 @@ Most newer changes include the relevant [jj](https://jj-vcs.dev) change ids in p
 
 ## Unreleased
 
+## v0.3.1 - 2026-10-03
+Warn about impending rename to `macro-kwargs`.
+
 ### Changes
-- *WARNING*: Impending rename from `proc-macro-kwargs` to `proc-macro`.
+- *WARNING*: Impending rename from `proc-macro-kwargs` to `macro-kwargs`.
 
 The crate has been marked deprecated in favor of its new name.
 The crate under the old name will receive no further updates.
 
-## v0.3.1 - 2026-10-03
+## v0.3.0 - 2026-10-03
 Update to syn v3
 
 ### Changes
