@@ -12,9 +12,13 @@ Most newer changes include the relevant [jj](https://jj-vcs.dev) change ids in p
 
 ## Unreleased
 
+## v0.3.2 - 2026-10-03
+Rename crate to `macro-kwargs`.
+
 ### Changes
 - *BIG*: Rename crate from `proc-macro-kwargs` to `macro-kwargs`. (ltmmqrrp)
   - Crate with old name has been marked `#[deprecated(...)]` in v0.3.1 and will receive no further updates.
+  - This crate's versions start off where `proc-macro-kwargs` ended.
 
 ## v0.3.1 - 2026-10-03
 Warn about impending rename to `macro-kwargs`.
