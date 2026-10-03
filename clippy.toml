@@ -1,0 +1,4 @@
+disallowed-types = [
+    { path = "std::collections::HashMap", replacement = "std::collections::BTreeMap", reason = "non-deterministic iteration" },
+    { path = "std::collections::HashSet", replacement = "std::collections::BTreeSet", reason = "non-deterministic iteration" },
+]
