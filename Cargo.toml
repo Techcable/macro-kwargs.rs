@@ -5,6 +5,7 @@ description = "Keyword argument parsing for function-like proc-macros"
 license.workspace = true
 repository.workspace = true
 edition.workspace = true
+rust-version.workspace = true
 
 [dependencies]
 quote = "1"
@@ -22,6 +23,10 @@ version = "0.3.3"
 edition = "2021"
 license = "MIT"
 repository = "https://github.com/Techcable/macro-kwargs.rs"
+# 1.56 - 2021 edition
+# 1.64 - workspace.package
+# 1.71 - syn@3
+rust-version = "1.71"
 
 [workspace.dependencies]
 proc-macro2 = { version = "1", default-features = false }

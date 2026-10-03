@@ -5,6 +5,7 @@ description = "Procedural derive for macro-kwargs"
 edition.workspace = true
 repository.workspace = true
 license.workspace = true
+rust-version.workspace = true
 
 [lib]
 proc-macro = true
