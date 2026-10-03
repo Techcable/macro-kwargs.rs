@@ -14,6 +14,7 @@ Most newer changes include the relevant [jj](https://jj-vcs.dev) change ids in p
 
 ### Added
 - Implement `Debug` for `NestedDict` (kwsztwtm)
+- Implement `Default` for `NestedDict`, allowing use with `#[kwarg(optional)]` (xlmlvnwn)
 
 ### Changed
 - Declare minimum supported rust version of 1.71 (mrvqwsux)

@@ -141,6 +141,14 @@ pub struct NestedDict<K: MacroDictKey, V: MacroArg> {
     /// The underlying map of keys to values
     pub elements: IndexMap<K, V>,
 }
+impl<K: MacroDictKey, V: MacroArg> Default for NestedDict<K, V> {
+    fn default() -> Self {
+        NestedDict {
+            braces: Default::default(),
+            elements: IndexMap::new(),
+        }
+    }
+}
 impl<K: MacroDictKey, V: MacroArg> NestedDict<K, V> {
     fn try_extend_pairs(
         &mut self,
