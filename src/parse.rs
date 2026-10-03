@@ -6,7 +6,7 @@ use std::ops::{Deref, DerefMut};
 
 use indexmap::IndexMap;
 use indexmap::map::Entry;
-use proc_macro2::{Ident, TokenStream};
+use proc_macro2::{Ident, Span, TokenStream};
 use quote::ToTokens;
 use syn::parse::{Parse, ParseStream};
 use syn::punctuated::Punctuated;
@@ -55,9 +55,30 @@ macro_rules! macro_arg_parse_map {
         }
     };
 }
-macro_rules! macro_arg_parse_int {
-    ($($target:ty),*) => {
-        $(macro_arg_parse_map!($target; via syn::LitInt, |i| i.base10_parse::<$target>()?);)*
+fn require_matching_suffix(
+    span: Span,
+    actual_suffix: &str,
+    expected_type: &str,
+) -> syn::Result<()> {
+    if actual_suffix.is_empty() {
+        // with no suffix, only fail if parse does
+        return Ok(());
+    }
+    if expected_type == actual_suffix {
+        Ok(())
+    } else {
+        Err(syn::Error::new(
+            span,
+            format!("Cannot parse a `{actual_suffix}` as a `{expected_type}`"),
+        ))
+    }
+}
+macro_rules! macro_arg_parse_num {
+    ($p:path => $($target:ty),*) => {
+        $(macro_arg_parse_map!($target; via $p, |i| {
+            require_matching_suffix(i.span(), i.suffix(), stringify!($target))?;
+            i.base10_parse::<$target>()?
+        });)*
     };
 }
 
@@ -75,11 +96,10 @@ macro_rules! parse_macro_arg_via_syn {
         }
     };
 }
-macro_arg_parse_int!(u8, u16, u32, u64, usize, i8, i16, i32, i64, isize);
+macro_arg_parse_num!(syn::LitInt => u8, u16, u32, u64, usize, i8, i16, i32, i64, isize);
+macro_arg_parse_num!(syn::LitFloat => f32, f64);
 macro_arg_parse_map!(String; via syn::LitStr, |s| s.value());
 macro_arg_parse_map!(bool; via syn::LitBool, |s| s.value());
-macro_arg_parse_map!(f64; via syn::LitFloat, |f| f.base10_parse::<f64>()?);
-macro_arg_parse_map!(f32; via syn::LitFloat, |f| f.base10_parse::<f32>()?);
 macro_arg_parse_map!(char; via syn::LitChar, |c| c.value());
 
 /// The key in a [`NestedDict`]
@@ -405,6 +425,52 @@ mod test {
     fn ints() {
         assert_eq!(parse_str::<i32>("5").unwrap(), 5);
         assert_eq!(parse_str::<i32>("8").unwrap(), 8);
+    }
+    #[test]
+    fn number_suffixes() {
+        // matching suffixes are accepted
+        assert_eq!(parse_str::<u8>("5u8").unwrap(), 5);
+        assert_eq!(parse_str::<i64>("-5i64").unwrap(), -5);
+        assert_eq!(parse_str::<usize>("7usize").unwrap(), 7);
+        assert_eq!(parse_str::<f32>("1.5f32").unwrap(), 1.5);
+        assert_eq!(parse_str::<f64>("2.5f64").unwrap(), 2.5);
+        // so are unsuffixed literals
+        assert_eq!(parse_str::<u8>("5").unwrap(), 5);
+        assert_eq!(parse_str::<f64>("1.5").unwrap(), 1.5);
+        // but unsuffixed literals still need to fit in the type
+        assert!(parse_str::<u8>("256").is_err());
+
+        // mismatched suffixes are rejected
+        let check = |err: syn::Error, expected_msg: &str, expected_column: usize| {
+            assert_eq!(err.to_string(), expected_msg);
+            // relies on the `span-locations` feature of proc-macro2 (enabled in dev-dependencies)
+            assert_eq!(err.span().start().column, expected_column, "{expected_msg}");
+        };
+        check(
+            parse_str::<u8>("5i64").unwrap_err(),
+            "Cannot parse a `i64` as a `u8`",
+            0,
+        );
+        check(
+            parse_str::<u64>("  5usize").unwrap_err(),
+            "Cannot parse a `usize` as a `u64`",
+            2,
+        );
+        check(
+            parse_str::<i32>("-5i8").unwrap_err(),
+            "Cannot parse a `i8` as a `i32`",
+            0,
+        );
+        check(
+            parse_str::<f64>("1.5f32").unwrap_err(),
+            "Cannot parse a `f32` as a `f64`",
+            0,
+        );
+        check(
+            parse_str::<f32>("2.5f64").unwrap_err(),
+            "Cannot parse a `f64` as a `f32`",
+            0,
+        );
     }
     #[test]
     fn strs() {

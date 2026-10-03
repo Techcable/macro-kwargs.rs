@@ -22,6 +22,9 @@ Most newer changes include the relevant [jj](https://jj-vcs.dev) change ids in p
   - Since the MIT license is still an option, this change actually makes licensing more permissive.
 - Require the exact matching version of `macro-kwargs-derive` (ultltztn)
   - Generated code relies on internal APIs, so mismatched versions could fail to compile.
+- Reject integer and float literals whose suffix doesn't match the target type (sovtoywz)
+  - For example, `5i64` can no longer be parsed as a `u8`. Unsuffixed literals are unaffected.
+  - This is technically a breaking change, but any code that relied on the prior behavior was buggy.
 
 ### Fixed
 - Fix span of missing argument errors in nested structs (pnrqmzup)
