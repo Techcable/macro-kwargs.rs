@@ -26,8 +26,9 @@ Add a `#[kwarg(with_syn)]` attribute to `#[derive(MacroKeywordArguments)]`.
   - More concise than using the [`proc_macro_kwargs::parse::Syn`] wrapper type (which doesn't even support `#[kwarg(with_wrapper)]`)
   - Also available through the `#[kwarg(syn)]` shorthand
 
+[`MacroArg`]: https://docs.rs/proc-macro-kwargs/0.2/proc_macro_kwargs/parse/trait.MacroArg.html
 [`syn::Parse`]: https://docs.rs/syn/latest/syn/parse/trait.Parse.html
-[`proc_macro_kwargs::parse::Syn`]:  https://docs.rs/proc-macro-kwargs/0.2.0/proc_macro_kwargs/parse/struct.Syn.html
+[`proc_macro_kwargs::parse::Syn`]:  https://docs.rs/proc-macro-kwargs/0.2/proc_macro_kwargs/parse/struct.Syn.html
 
 ## v0.2.0 - 2024-04-12
 Support stable rust.
