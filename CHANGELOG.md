@@ -39,6 +39,7 @@ Most newer changes include the relevant [jj](https://jj-vcs.dev) change ids in p
 - `NestedDict` reports every duplicate key, instead of stopping at the first one (xuuxssvv)
 - Correct the docs for `ParsedKeywordArguments` ordering: arguments are in the order the user wrote them, not the order the fields are declared in (rwmympok)
   - This was already the actual behavior; only the documentation was wrong.
+- Allow a trailing comma in `#[kwarg(...)]`, like `#[kwarg(optional,)]` (xwwsquxv)
 
 ## v0.3.3 - 2026-10-03
 Rename crate to `macro-kwargs`.

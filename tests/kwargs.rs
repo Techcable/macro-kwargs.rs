@@ -300,3 +300,21 @@ fn iter_order_matches_input() {
         .collect::<Vec<_>>();
     assert_eq!(names, ["opt", "foo", "first"]);
 }
+
+/// Trailing commas are allowed inside `#[kwarg(...)]`.
+#[derive(MacroKeywordArgs, Debug, PartialEq)]
+#[rustfmt::skip] // rustfmt would remove the trailing commas being tested
+pub struct TrailingCommaAttrs {
+    #[kwarg(optional,)]
+    a: u32,
+    #[kwarg(rename = "renamed", optional,)]
+    b: u32,
+}
+
+#[test]
+fn trailing_comma_attrs() {
+    assert_eq!(
+        syn::parse_str::<TrailingCommaAttrs>("renamed => 2").unwrap(),
+        TrailingCommaAttrs { a: 0, b: 2 }
+    );
+}

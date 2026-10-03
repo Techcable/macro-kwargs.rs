@@ -380,6 +380,10 @@ impl Parse for FieldAttrs {
             }
             if stream.peek(Token![,]) {
                 stream.parse::<Token![,]>()?;
+                if stream.is_empty() {
+                    // allow a trailing comma
+                    break;
+                }
                 continue;
             } else {
                 break;
