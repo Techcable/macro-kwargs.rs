@@ -12,6 +12,11 @@ Most newer changes include the relevant [jj](https://jj-vcs.dev) change ids in p
 
 ## Unreleased
 
+## v0.3.4
+Fix span of missing argument errors in nested structs.
+
+With the assistance of Claude Code, this release includes many other fixes and cleanups.
+
 ### Added
 - Implement `Debug` for `NestedDict` (kwsztwtm)
 - Implement `Default` for `NestedDict`, allowing use with `#[kwarg(optional)]` (xlmlvnwn)
