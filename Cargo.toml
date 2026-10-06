@@ -15,7 +15,7 @@ quote = "1"
 indexmap = "2"
 # Exact version, since generated code relies on unstable internals (like `__private`).
 # Must be kept in sync with `workspace.package.version`.
-macro-kwargs-derive = { version = "=0.3.4", path = "lib/derive" }
+macro-kwargs-derive = { version = "=0.3.5", path = "lib/derive" }
 proc-macro2.workspace = true
 syn.workspace = true
 
@@ -34,7 +34,7 @@ members = [".", "lib/derive", "lib/test-macros"]
 default-members = [".", "lib/derive", "lib/test-macros"]
 
 [workspace.package]
-version = "0.3.4"
+version = "0.3.5"
 edition = "2021"
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/Techcable/macro-kwargs.rs"

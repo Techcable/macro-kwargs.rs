@@ -11,6 +11,9 @@ A title is required for publishing a github release, so all versions should have
 Most newer changes include the relevant [jj](https://jj-vcs.dev) change ids in parens. An example of a change id is wuoxvnsw.
 
 ## Unreleased
+Add `Braced` parse wrapper.
+
+## v0.3.5 - 2026-10-05
 
 ### Added
 - Add `Braced` wrapper, which parses an item surrounded by braces `{ }` (mpnuopmt)
