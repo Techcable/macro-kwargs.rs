@@ -254,6 +254,59 @@ impl<T: MacroArg> MacroArg for ExplicitOption<T> {
     }
 }
 
+/// Parses an item surrounded by braces `{ }`.
+///
+/// The braces must contain exactly one item,
+/// with no trailing tokens.
+#[derive(PartialEq, Eq, Debug, Hash)]
+pub struct Braced<T: MacroArg> {
+    /// The brace tokens
+    pub braces: syn::token::Brace,
+    /// The item inside the braces
+    pub inner: T,
+}
+impl<T: MacroArg> Braced<T> {
+    /// Convert this type into its inner type
+    #[inline]
+    pub fn into_inner(self) -> T {
+        self.inner
+    }
+}
+impl<T: MacroArg> From<T> for Braced<T> {
+    #[inline]
+    fn from(inner: T) -> Self {
+        Braced {
+            braces: Default::default(),
+            inner,
+        }
+    }
+}
+impl<T: MacroArg> Deref for Braced<T> {
+    type Target = T;
+    #[inline]
+    fn deref(&self) -> &T {
+        &self.inner
+    }
+}
+impl<T: MacroArg> DerefMut for Braced<T> {
+    #[inline]
+    fn deref_mut(&mut self) -> &mut T {
+        &mut self.inner
+    }
+}
+impl<T: MacroArg> Parse for Braced<T> {
+    fn parse(stream: ParseStream) -> syn::Result<Self> {
+        let content;
+        let braces = braced!(content in stream);
+        let inner = T::parse_macro_arg(&content)?;
+        if !content.is_empty() {
+            return Err(content.error("Unexpected token after braced item"));
+        }
+        Ok(Braced { braces, inner })
+    }
+}
+parse_macro_arg_via_syn!(Braced::<T>; for <T> where T: MacroArg);
+
 /// A nested list of [Punctuated] items,
 /// surrounded by brackets (ex. `[1, 2, 3]`)
 ///
@@ -517,6 +570,29 @@ mod test {
         check("Foo", 0);
         check("  Foo(5)", 2);
         check("5", 0);
+    }
+    #[test]
+    fn braced() {
+        assert_eq!(parse_str::<Braced<i32>>("{5}").unwrap().into_inner(), 5);
+        assert_eq!(
+            *parse_str::<Braced<String>>(r##"{ "foo" }"##).unwrap(),
+            "foo"
+        );
+        assert_eq!(
+            parse_str::<Braced<NestedList<u32>>>("{[1, 2, 3]}")
+                .unwrap()
+                .elements,
+            [1, 2, 3]
+        );
+        // braces are required
+        assert!(parse_str::<Braced<i32>>("5").is_err());
+        assert!(parse_str::<Braced<i32>>("(5)").is_err());
+        // exactly one item
+        assert!(parse_str::<Braced<i32>>("{}").is_err());
+        let err = parse_str::<Braced<i32>>("{5 6}").unwrap_err();
+        assert_eq!(err.to_string(), "Unexpected token after braced item");
+        // relies on the `span-locations` feature of proc-macro2 (enabled in dev-dependencies)
+        assert_eq!(err.span().start().column, 3);
     }
     #[test]
     fn nested_dict_duplicate_keys() {

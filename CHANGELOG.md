@@ -12,6 +12,9 @@ Most newer changes include the relevant [jj](https://jj-vcs.dev) change ids in p
 
 ## Unreleased
 
+### Added
+- Add `Braced` wrapper, which parses an item surrounded by braces `{ }` (mpnuopmt)
+
 ## v0.3.4 - 2026-10-03
 Fix span of missing argument errors in nested structs.
 
