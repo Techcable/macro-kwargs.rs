@@ -12,7 +12,7 @@ Most newer changes include the relevant [jj](https://jj-vcs.dev) change ids in p
 
 ## Unreleased
 
-## v0.3.4
+## v0.3.4 - 2026-10-03
 Fix span of missing argument errors in nested structs.
 
 With the assistance of Claude Code, this release includes many other fixes and cleanups.
