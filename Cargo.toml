@@ -53,7 +53,7 @@ proc-macro2 = { version = "1", default-features = false }
 [workspace.dependencies.syn]
 version = "3"
 default-features = false
-features = ["parsing", "printing", "derive", "extra-traits"]
+features = ["parsing", "printing", "derive", "extra-traits", "clone-impls"]
 
 [workspace.lints.clippy]
 ## groups ##
