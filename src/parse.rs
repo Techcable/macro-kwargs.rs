@@ -258,7 +258,7 @@ impl<T: MacroArg> MacroArg for ExplicitOption<T> {
 ///
 /// The braces must contain exactly one item,
 /// with no trailing tokens.
-#[derive(PartialEq, Eq, Debug, Hash)]
+#[derive(PartialEq, Eq, Debug, Hash, Clone)]
 pub struct Braced<T: MacroArg> {
     /// The brace tokens
     pub braces: syn::token::Brace,

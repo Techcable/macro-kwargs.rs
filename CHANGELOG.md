@@ -12,6 +12,9 @@ Most newer changes include the relevant [jj](https://jj-vcs.dev) change ids in p
 
 ## Unreleased
 
+### Added
+- Add `Clone` impl to `parse::Braced` wrapper (llwxntnt)
+
 ### Changed
 - Require `syn/clone-impls` feature, needed for `Clone` impls for `NestedList` (among others) (qozqwmmk)
   - This is turned on in the default syn features, so shouldn't add any compile time in the common case.
