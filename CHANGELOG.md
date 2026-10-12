@@ -12,6 +12,11 @@ Most newer changes include the relevant [jj](https://jj-vcs.dev) change ids in p
 
 ## Unreleased
 
+## v0.3.6 - 2026-10-12
+Add `Clone` impls for `NestedList` and `NestedDict`.
+
+Now requires the `syn/clone-impls` feature (which is on by default).
+
 ### Added
 - Add `Clone` impl to `parse::Braced` wrapper (llwxntnt)
 - Derive `Clone` impls for `NestedList` and `NestedDict` (nsysprpp)
