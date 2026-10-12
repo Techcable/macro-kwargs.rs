@@ -135,6 +135,7 @@ parse_macro_arg_via_syn!(KeyValuePair::<K, V>; for <K, V> where K: MacroDictKey,
 ///
 /// ## Example
 /// `{ a => b, c => b }` is a `NestedDict<Ident, Ident>`
+#[derive(Clone)]
 pub struct NestedDict<K: MacroDictKey, V: MacroArg> {
     /// The brace token
     pub braces: syn::token::Brace,
@@ -311,7 +312,7 @@ parse_macro_arg_via_syn!(Braced::<T>; for <T> where T: MacroArg);
 /// surrounded by brackets (ex. `[1, 2, 3]`)
 ///
 /// By default, the separator token is the comma `,`
-#[derive(PartialEq, Eq, Debug, Hash)]
+#[derive(PartialEq, Eq, Debug, Hash, Clone)]
 pub struct NestedList<T: MacroArg, P = Token![,]> {
     /// The brackets tokens
     pub brackets: syn::token::Bracket,
